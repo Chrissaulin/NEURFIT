@@ -1,0 +1,98 @@
+# =====================================================================
+# Smart Wardrobe — label taxonomy (SINGLE SOURCE OF TRUTH, PRD §4.3)
+# ---------------------------------------------------------------------
+# 05_export.py turns this file into backend/models/labels.json.
+# The ORDER of `article_type`, `base_colour` and `usage` below defines the
+# softmax output index order, so changing it requires retraining the model
+# and bumping `version`.
+# =====================================================================
+version: labels-v1
+seed: 42
+img_size: [128, 128]
+
+# ---------------------------------------------------------------------
+# 4.3.1 article_type — 23 supported classes + `other`
+# `dataset` is the exact `articleType` string found in styles.csv.
+# `slot` is null for `other` (cannot be stored as a wardrobe item).
+# ---------------------------------------------------------------------
+article_type:
+  - { key: tshirt,      display: Kaos,             slot: top,       dataset: "Tshirts" }
+  - { key: shirt,       display: Kemeja,           slot: top,       dataset: "Shirts" }
+  - { key: top,         display: Atasan / Blus,    slot: top,       dataset: "Tops" }
+  - { key: sweatshirt,  display: Sweatshirt,       slot: top,       dataset: "Sweatshirts" }
+  - { key: sweater,     display: Sweater,          slot: top,       dataset: "Sweaters" }
+  - { key: jacket,      display: Jaket,            slot: top,       dataset: "Jackets" }
+  - { key: jeans,       display: Jeans,            slot: bottom,    dataset: "Jeans" }
+  - { key: trousers,    display: Celana Panjang,   slot: bottom,    dataset: "Trousers" }
+  - { key: shorts,      display: Celana Pendek,    slot: bottom,    dataset: "Shorts" }
+  - { key: skirt,       display: Rok,              slot: bottom,    dataset: "Skirts" }
+  - { key: track_pants, display: Celana Training,  slot: bottom,    dataset: "Track Pants" }
+  - { key: casual_shoes,  display: Sepatu Kasual,      slot: shoes, dataset: "Casual Shoes" }
+  - { key: formal_shoes,  display: Sepatu Formal,      slot: shoes, dataset: "Formal Shoes" }
+  - { key: sports_shoes,  display: Sepatu Olahraga,    slot: shoes, dataset: "Sports Shoes" }
+  - { key: sandals,       display: Sandal,             slot: shoes, dataset: "Sandals" }
+  - { key: flip_flops,    display: Sandal Jepit,       slot: shoes, dataset: "Flip Flops" }
+  - { key: heels,         display: Sepatu Hak Tinggi,  slot: shoes, dataset: "Heels" }
+  - { key: flats,         display: Sepatu Flat,        slot: shoes, dataset: "Flats" }
+  - { key: watch,       display: Jam Tangan,       slot: accessory, dataset: "Watches" }
+  - { key: belt,        display: Ikat Pinggang,    slot: accessory, dataset: "Belts" }
+  - { key: handbag,     display: Tas Tangan,       slot: accessory, dataset: "Handbags" }
+  - { key: backpack,    display: Ransel,           slot: accessory, dataset: "Backpacks" }
+  - { key: sunglasses,  display: Kacamata Hitam,   slot: accessory, dataset: "Sunglasses" }
+  - { key: other,       display: Belum Didukung,   slot: null,      dataset: null }
+
+# Rows whose articleType is not listed above are folded into `other`
+# (sampled down to this many images so it cannot dominate the loss).
+other_class_max_samples: 4000
+
+# ---------------------------------------------------------------------
+# 4.3.2 base_colour — 14 colour families (consolidated)
+# ---------------------------------------------------------------------
+base_colour:
+  - { key: black,     display: Hitam,       hex: "#111827", dataset: ["Black"] }
+  - { key: white,     display: Putih,       hex: "#F9FAFB", dataset: ["White", "Off White"] }
+  - { key: grey,      display: Abu-abu,     hex: "#9CA3AF", dataset: ["Grey", "Grey Melange", "Charcoal", "Silver", "Steel"] }
+  - { key: navy_blue, display: Biru Dongker, hex: "#1E2A5A", dataset: ["Navy Blue"] }
+  - { key: blue,      display: Biru,        hex: "#2563EB", dataset: ["Blue", "Turquoise Blue", "Teal"] }
+  - { key: brown,     display: Cokelat,     hex: "#7C4A2D", dataset: ["Brown", "Coffee Brown", "Taupe", "Mushroom Brown", "Rust"] }
+  - { key: beige,     display: Krem / Beige, hex: "#E7D8BE", dataset: ["Beige", "Cream", "Nude", "Skin", "Khaki", "Tan"] }
+  - { key: red,       display: Merah,       hex: "#DC2626", dataset: ["Red", "Maroon", "Burgundy"] }
+  - { key: green,     display: Hijau,       hex: "#16A34A", dataset: ["Green", "Olive", "Sea Green", "Lime Green"] }
+  - { key: pink,      display: Merah Muda,  hex: "#F472B6", dataset: ["Pink", "Rose", "Peach"] }
+  - { key: yellow,    display: Kuning,      hex: "#FACC15", dataset: ["Yellow", "Mustard", "Gold"] }
+  - { key: orange,    display: Oranye,      hex: "#F97316", dataset: ["Orange"] }
+  - { key: purple,    display: Ungu,        hex: "#7C3AED", dataset: ["Purple", "Lavender", "Mauve", "Magenta"] }
+  - { key: multi,     display: Multiwarna,  hex: "linear-gradient", dataset: ["Multi"] }
+
+# ---------------------------------------------------------------------
+# 4.3.3 usage — 5 classes. Rows with Ethnic/Home/empty are NOT dropped,
+# they only mask the `usage` head (sample_weight = 0).
+# ---------------------------------------------------------------------
+usage:
+  - { key: casual,       display: Kasual,       dataset: ["Casual", "Travel"] }
+  - { key: smart_casual, display: Smart Casual, dataset: ["Smart Casual"] }
+  - { key: formal,       display: Formal,       dataset: ["Formal"] }
+  - { key: sports,       display: Olahraga,     dataset: ["Sports"] }
+  - { key: party,        display: Pesta,        dataset: ["Party"] }
+
+# usage values that are valid rows but must be masked out of the usage head.
+usage_masked_values: ["Ethnic", "Home"]
+
+# ---------------------------------------------------------------------
+# 4.3.4 Event compatibility matrix (USAGE_COMPAT), mirrored in backend.
+# ---------------------------------------------------------------------
+usage_compat:
+  casual:       ["casual", "smart_casual"]
+  smart_casual: ["smart_casual", "casual", "formal"]
+  formal:       ["formal", "smart_casual"]
+  sports:       ["sports", "casual"]
+  party:        ["party", "smart_casual", "formal"]
+
+# ---------------------------------------------------------------------
+# Slot display names.
+# ---------------------------------------------------------------------
+slots:
+  - { key: top,       display: Atasan }
+  - { key: bottom,    display: Bawahan }
+  - { key: shoes,     display: Sepatu }
+  - { key: accessory, display: Aksesoris }

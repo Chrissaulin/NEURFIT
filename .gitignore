@@ -1,0 +1,35 @@
+# --- Data & generated artifacts (large, reproducible) ---
+ml/data/
+ml/artifacts/
+
+# --- Backend runtime ---
+backend/uploads/
+backend/models/
+backend/demo_assets/
+*.db
+*.db-wal
+*.db-shm
+
+# --- Python ---
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# --- Frontend / Node ---
+node_modules/
+frontend/dist/
+.vite/
+
+# --- Environment ---
+.env
+!.env.example
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
