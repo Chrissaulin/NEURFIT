@@ -122,7 +122,7 @@ Smart Wardrobe mengubah foto pakaian menjadi **lemari digital yang "memahami" is
 | ID | Asumsi | Kapan diverifikasi |
 |---|---|---|
 | A-01 | *Fashion Product Images (Small)* berisi folder `images/` dan `styles.csv` (~44.000 baris; folder duplikat `myntradataset` diabaikan/dihapus). Sebagian baris CSV rusak (wajib `on_bad_lines='skip'`) dan sebagian `id` tidak punya file gambar. | Hari 1 |
-| A-02 | Skema Polyvore (`train_no_dup.json`, `valid_no_dup.json`, `test_no_dup.json` + `category_id.txt`): tiap entri JSON memiliki `set_id` dan daftar `items` (dengan `index`, `categoryid`, `name`); gambar di `images/{set_id}/{index}.jpg`. | Hari 1 |
+| A-02 | Skema Polyvore (`train_no_dup.json`, `valid_no_dup.json`, `test_no_dup.json` + `category_id.txt`): tiap entri JSON memiliki `set_id` dan daftar `items` (dengan `index`, `categoryid`, `name`); gambar di **`Re-PolyVore/{category}/{set_id}_{index}.jpg`** (layout aktual terverifikasi; ±55% item punya file gambar). | Hari 1 |
 | A-03 | Python **3.10–3.12**; versi mayor-minor TensorFlow/Keras **identik** antara lingkungan training (`ml/`) dan `backend/` (dicatat di `manifest.json`). | Hari 1 |
 | A-04 | Jika skema Polyvore tidak cocok atau model Bi-LSTM belum konvergen dalam batas waktu, jalur cadangan `RuleBasedScorer` (§4.5.7) diaktifkan agar MVP tetap terkirim. | Hari 3–4 |
 
@@ -253,7 +253,7 @@ idle ──pilih foto──▶ preview ──Analisis──▶ analyzing ──2
 | NFR-03 | Privasi | Seluruh data tersimpan lokal; EXIF dihapus; tidak ada telemetri pihak ketiga. |
 | NFR-04 | Reliabilitas | Penyimpanan item atomik: tulis file → *commit* DB; bila DB gagal, file dihapus; bila file gagal, tidak ada baris DB. |
 | NFR-05 | Kompatibilitas | Chrome/Edge/Firefox/Safari terbaru; Android Chrome & iOS Safari; *viewport* ≥ 360 px; kompatibel lintas OS (Windows/Linux/macOS) dengan normalisasi *path* `.as_posix()`. |
-| NFR-06 | Portabilitas ML | Skrip `ml/` datar dan berjalan di lokal (`.venv`) maupun Google Colab hanya dengan mengubah variabel lingkungan (`SW_DATA_DIR`, `SW_ARTIFACT_DIR`). |
+| NFR-06 | Portabilitas ML | Kode `ml/` datar (notebook + skrip) dan berjalan di lokal (`.venv`) maupun Google Colab hanya dengan mengubah variabel lingkungan (`SW_DATA_DIR`, `SW_ARTIFACT_DIR`). |
 | NFR-07 | Reproduktibilitas | *Seed* 42; versi pustaka dipin; `manifest.json` mencatat versi TF/Keras, `sha256`, dan metrik. |
 | NFR-08 | Testabilitas | `pytest` untuk `services/` dan endpoint utama + *golden test* paritas *preprocessing* (§4.6.3). |
 
@@ -274,7 +274,7 @@ idle ──pilih foto──▶ preview ──Analisis──▶ analyzing ──2
  └───────────────┬───────────────┘
                  │ dipakai ulang sebagai feature extractor
                  ▼
- Polyvore (train/valid/test_no_dup.json + category_id.txt + images/{set_id}/{index}.jpg)
+ Polyvore (train/valid/test_no_dup.json + category_id.txt + Re-PolyVore/{category}/{set_id}_{index}.jpg)
         │  (petakan slot via category_id.txt → ekstrak embedding → susun outfit [top,bottom,shoes,(accessory)])
         │  (positif = set asli → 1 ; negative sampling → 0)
         ▼
@@ -288,7 +288,7 @@ idle ──pilih foto──▶ preview ──Analisis──▶ analyzing ──2
 
 ### 4.2 Lingkungan Training & Portabilitas
 
-**Prinsip:** kode ML disusun sebagai **skrip Python datar** di dalam folder `ml/` (`01_prepare_fashion.py`, `02_train_tagger.py`, `03_prepare_polyvore.py`, `04_train_scorer.py`, `05_export.py`, serta modul bersama `preprocess.py` dan `config_utils.py`). Tanpa `pyproject.toml` atau hierarki paket dalam agar mudah dijalankan langsung dari terminal lokal maupun sel Google Colab.
+**Prinsip:** Pekerjaan ML disusun datar di dalam folder `ml/`. **EDA, preprocessing, dan starter modeling disajikan sebagai notebook** (`eda.ipynb`, `preprocessing.ipynb`, `modeling.ipynb`); tahap lanjutan (Model 2 & ekspor) memakai skrip datar (`03_prepare_polyvore.py`, `04_train_scorer.py`, `05_export.py`) bersama modul bersama `preprocess.py` dan `config_utils.py`. Notebook mengimpor modul bersama (tanpa duplikasi logika) dan tetap portabel ke Google Colab. Tanpa `pyproject.toml` atau hierarki paket dalam agar mudah dijalankan langsung dari lokal maupun sel Colab.
 
 | Aspek | Ketentuan |
 |---|---|
@@ -297,17 +297,30 @@ idle ──pilih foto──▶ preview ──Analisis──▶ analyzing ──2
 | Deteksi lingkungan | `config_utils.py`: path data/artefak dibaca dari env var `SW_DATA_DIR` (default `ml/data`) dan `SW_ARTIFACT_DIR` (default `ml/artifacts`). Di Colab cukup set `%env SW_DATA_DIR=...` ke Google Drive. |
 | Konfigurasi | YAML di `ml/configs/` (`labels.yaml`, `tagger.yaml`, `scorer.yaml`); mendukung *override* CLI `--max-samples` dan `--epochs` untuk *smoke test* cepat di CPU lokal. |
 | Reproduktibilitas | `keras.utils.set_random_seed(42)`; semua *split* disimpan sebagai file CSV/NPZ agar identik antar mesin. |
-| Perangkat keras | CPU lokal: cocok untuk persiapan data (`01_`, `03_`) dan *smoke test* (`--max-samples 2000 --epochs 1`). **Training penuh disarankan di Google Colab (GPU T4).** |
+| Perangkat keras | CPU lokal: cocok untuk persiapan data (`eda.ipynb`, `preprocessing.ipynb`, `03_`) dan *smoke test* (`--max-samples 2000 --epochs 1`). **Training penuh disarankan di Google Colab (GPU T4).** |
 | Sinkronisasi versi TF | Versi TF/Keras saat training dicatat di `manifest.json`; `backend/requirements.txt` **WAJIB** memakai versi *major.minor* yang sama. |
 
-**Entry point CLI** (dijalankan dari direktori `ml/`, identik lokal & Colab):
+**Entry point** (dijalankan dari direktori `ml/`, identik lokal & Colab):
 
 ```bash
-python 01_prepare_fashion.py    # parse styles.csv, square-crop & cache 128px uint8, stratified splits
-python 02_train_tagger.py       # training MobileNetV2 multi-output + evaluasi test split
+# EDA & preprocessing (notebook)
+jupyter notebook eda.ipynb            # eksplorasi Fashion + Polyvore (read-only)
+jupyter notebook preprocessing.ipynb  # parse styles.csv, mapping, splits, cache 128px uint8
+
+# Modeling Model 1 (starter notebook)
+jupyter notebook modeling.ipynb       # MobileNetV2 multi-output + evaluasi test split
+
+# Tahap lanjutan (skrip datar)
 python 03_prepare_polyvore.py   # mapping slot via category_id.txt + ekstraksi embedding CNN
 python 04_train_scorer.py       # negative sampling + training Bi-LSTM + evaluasi test split
 python 05_export.py --to ../backend/models --demo-dir ../backend/demo_assets --verify
+```
+
+Notebook dapat dieksekusi dari terminal (untuk reproduksibilitas/validasi):
+
+```bash
+python -m nbconvert --to notebook --execute --inplace --ExecutePreprocessor.kernel_name=neurfit eda.ipynb
+python -m nbconvert --to notebook --execute --inplace --ExecutePreprocessor.kernel_name=neurfit preprocessing.ipynb
 ```
 
 ### 4.3 Taksonomi Label
@@ -493,7 +506,7 @@ other_class_max_samples: 4000
 
 #### 4.5.1 Dataset & Parsing (`03_prepare_polyvore.py`)
 
-- Berkas: `train_no_dup.json`, `valid_no_dup.json`, `test_no_dup.json`, `category_id.txt`, dan folder gambar `images/{set_id}/{index}.jpg` di `ml/data/raw/polyvore/`.
+- Berkas: `train_no_dup.json`, `valid_no_dup.json`, `test_no_dup.json`, `category_id.txt`, dan folder gambar `Re-PolyVore/{category}/{set_id}_{index}.jpg` di `ml/data/polyvore/`.
 - Gunakan *split* resmi (`train`, `valid`, `test`) tanpa kebocoran antar *split*. Kumpulan item untuk *negative sampling* **hanya** diambil dari *split* yang sama.
 
 #### 4.5.2 Penentuan Slot via `category_id.txt` & Ekstraksi *Embedding*
@@ -1228,9 +1241,9 @@ backend/uploads/
 smart-wardrobe/
 ├── README.md                      # quickstart (lihat Lampiran C)
 ├── prd.md                         # dokumen ini
-├── .gitignore                     # data/, artifacts/, uploads/, *.db, .venv/, node_modules/
+├── .gitignore                     # ml/data/, ml/artifacts/, backend/uploads/, *.db, .venv/, node_modules/
 │
-├── ml/                            # skrip datar training & ekspor model (lokal + Colab)
+├── ml/                            # notebook EDA/preprocessing + skrip lanjutan (lokal + Colab)
 │   ├── requirements.txt           # tensorflow (pin), numpy, pandas, scikit-learn, pillow, pyyaml, tqdm
 │   ├── configs/
 │   │   ├── labels.yaml            # SUMBER TUNGGAL taksonomi label (§4.3)
@@ -1238,13 +1251,14 @@ smart-wardrobe/
 │   │   └── scorer.yaml
 │   ├── preprocess.py              # preprocess_pil() — square center-crop + resize 128 (§4.6.2)
 │   ├── config_utils.py            # loader YAML & path SW_DATA_DIR / SW_ARTIFACT_DIR
-│   ├── 01_prepare_fashion.py      # parse styles.csv (on_bad_lines='skip'), mapping, splits, cache .npy
-│   ├── 02_train_tagger.py         # training MobileNetV2 multi-output + evaluasi test split
+│   ├── eda.ipynb                  # EDA Fashion + Polyvore (read-only, output tersimpan)
+│   ├── preprocessing.ipynb        # parse styles.csv, mapping, splits, cache fashion_128.npy
+│   ├── modeling.ipynb             # starter Model 1 (MobileNetV2 multi-output + embedding 256)
 │   ├── 03_prepare_polyvore.py     # parser JSON + category_id.txt slot mapping + ekstraksi embedding CNN
 │   ├── 04_train_scorer.py         # negative sampling + training Bi-LSTM + evaluasi test split
 │   ├── 05_export.py               # salin .keras + labels.json + demo_assets + golden test
-│   ├── data/                      # (gitignored) raw/{fashion,polyvore}/, processed/
-│   └── artifacts/                 # (gitignored) tagger/, scorer/, metrics.json
+│   ├── data/                      # (gitignored) fashionProduct/, polyvore/, processed/
+│   └── artifacts/                 # (gitignored) tagger/, scorer/, eda/, metrics.json
 │
 ├── backend/
 │   ├── requirements.txt           # fastapi, uvicorn[standard], sqlalchemy>=2, pydantic>=2, pydantic-settings,
@@ -1281,14 +1295,14 @@ smart-wardrobe/
 ### 8.2 Rencana Kerja Harian (7 Hari)
 
 **Hari 1 — Fondasi, Verifikasi Kedua Dataset & Preprocessing**
-- Setup repo monorepo, `.venv` lokal, `requirements.txt`, dan `.gitignore`.
-- **Verifikasi kedua dataset sekaligus:** cek struktur `ml/data/raw/fashion/` (`images/` + `styles.csv`) dan `ml/data/raw/polyvore/` (`train_no_dup.json`, `valid_no_dup.json`, `test_no_dup.json`, `category_id.txt`, `images/{set_id}/{index}.jpg`).
-- Implementasi `preprocess.py` (*square center-crop* + *resize* 128×128) dan `01_prepare_fashion.py` (`on_bad_lines='skip'`, pemetaan label, cache `fashion_128.npy`).
+- Setup repo monorepo, `.venv` lokal, `requirements.txt`, dan `.gitignore` (data/ & artifacts/ diabaikan).
+- **Verifikasi kedua dataset sekaligus:** cek struktur `ml/data/fashionProduct/` (`images/` + `styles.csv`) dan `ml/data/polyvore/` (`train_no_dup.json`, `valid_no_dup.json`, `test_no_dup.json`, `category_id.txt`, `Re-PolyVore/{category}/{set_id}_{index}.jpg`).
+- Implementasi `preprocess.py` (*square center-crop* + *resize* 128×128), `eda.ipynb` (EDA kedua dataset), dan `preprocessing.ipynb` (`on_bad_lines='skip'`, pemetaan label, split, cache `fashion_128.npy`).
 - *Scaffold* backend FastAPI (`health`, `meta/labels`, `db.py`, `orm.py`) & frontend Vite + TypeScript + Tailwind.
-- **DoD:** `01_prepare_fashion.py` selesai; struktur Polyvore terverifikasi; `/health` dan `/meta/labels` aktif.
+- **DoD:** `eda.ipynb` & `preprocessing.ipynb` selesai dan tereksekusi; struktur Polyvore terverifikasi; `/health` dan `/meta/labels` aktif.
 
 **Hari 2 — Training & Evaluasi Model 1 (CNN Tagger)**
-- Implementasi dan jalankan `02_train_tagger.py` (Fase 1 + Fase 2) di Google Colab (atau lokal jika ber-GPU).
+- Implementasi dan jalankan `modeling.ipynb` (Fase 1 + Fase 2) di Google Colab (atau lokal jika ber-GPU).
 - Evaluasi metrik M-01…M-04 pada *test split* katalog, simpan model terbaik.
 - Implementasi backend `ImageService` (wajib `.as_posix()`), `ItemService`, `POST /items/analyze`, `POST /items`, `GET /items`, `DELETE /items/{id}`.
 - **DoD:** Model CNN mencapai target akurasi/F1 dasar dan tersimpan.
@@ -1366,15 +1380,17 @@ PORT=8000
 # --- 1. ML (lokal) ---
 python -m venv .venv && source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r ml/requirements.txt
+python -m ipykernel install --user --name neurfit --display-name "Python 3.10 (Neurfit)"
 cd ml
-python 01_prepare_fashion.py
-python 02_train_tagger.py --max-samples 2000 --epochs 1    # smoke test cepat di CPU lokal
+jupyter notebook eda.ipynb              # EDA kedua dataset (read-only)
+jupyter notebook preprocessing.ipynb    # split + cache fashion_128.npy
+jupyter notebook modeling.ipynb         # starter Model 1 (set RUN_TRAINING=True)
 
 # --- 2. ML (Google Colab untuk training penuh) ---
 #   from google.colab import drive; drive.mount('/content/drive')
 #   %env SW_DATA_DIR=/content/drive/MyDrive/smart-wardrobe/data
 #   %env SW_ARTIFACT_DIR=/content/drive/MyDrive/smart-wardrobe/artifacts
-#   !python 02_train_tagger.py
+#   !jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.kernel_name=python3 modeling.ipynb
 #   !python 03_prepare_polyvore.py
 #   !python 04_train_scorer.py
 #   !python 05_export.py --to /content/drive/MyDrive/smart-wardrobe/exported_models --verify
