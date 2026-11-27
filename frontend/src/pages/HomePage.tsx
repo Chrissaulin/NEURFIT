@@ -338,11 +338,10 @@ export default function HomePage() {
       <Section>
         <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
           <Reveal className="lg:col-span-5">
-            <GarmentImage
-              src="/demo/bottom-1.jpg"
-              alt="Tentang NeurFit"
-              slot="bottom"
-              className="aspect-[16/10] w-full border border-bone/15"
+            <img
+              src="/demo/logo.png"
+              alt="Logo NeurFit"
+              className="aspect-[16/10] w-full border border-bone/15 bg-studio object-contain p-8"
             />
           </Reveal>
           <Reveal delay={0.15} className="lg:col-span-7">
