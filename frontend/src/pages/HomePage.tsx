@@ -269,7 +269,7 @@ export default function HomePage() {
           {LOOKBOOK.map((look, index) => (
             <div
               key={`${look.img}-${index}`}
-              className={`w-[150px] shrink-0 overflow-hidden bg-[#232321] shadow-[0_24px_60px_rgba(0,0,0,0.88)] transition-transform duration-500 hover:z-40 hover:scale-105 sm:w-[195px] md:w-[225px] aspect-[3/4] ${look.className}`}
+              className={`w-[150px] shrink-0 overflow-hidden bg-[#232321] shadow-[0_24px_60px_rgba(0,0,0,0.88)] transition-transform duration-300 ease-out hover:rotate-0 hover:scale-105 sm:w-[195px] md:w-[225px] aspect-[3/4] ${look.className}`}
             >
               <img
                 src={look.img}
