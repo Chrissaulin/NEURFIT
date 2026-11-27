@@ -1146,7 +1146,7 @@ backend/uploads/
 | Aspek | Ketentuan |
 |---|---|
 | Stack | React 18, Vite, **TypeScript** (`strict`), Tailwind CSS 3.4+, `react-router-dom` 6, `@tanstack/react-query` 5, `clsx`, `lucide-react`, **`framer-motion`** 11 |
-| Tipografi & gerak | Fontshare **Clash Display** (display) + **Satoshi** (body); easing `cubic-bezier(0.22,1,0.36,1)`, spring untuk drag/reel, dan `prefers-reduced-motion` dihormati. |
+| Tipografi & gerak | Google Fonts **Bevan** (display slab) + **Space Mono** (label teknis/body), sesuai arah visual MOJAVE di `design.md`; easing `cubic-bezier(0.22,1,0.36,1)`, reveal `opacity`/`translate`, dan `prefers-reduced-motion` dihormati. |
 | Pendekatan | *Mobile-first*, 1 kolom di HP; navigasi tab di bagian atas (desktop) / bawah (HP) |
 | Bahasa | Indonesia; seluruh teks di `src/lib/i18n.ts` |
 | Tipe API | `src/types/api.ts` mencerminkan §6 persis |
