@@ -83,16 +83,21 @@ function HeroCopy({ size = 'lg' }: { size?: 'lg' | 'sm' }) {
 
 function PhotoCard({ img, label, slot, to, accent = false }: Photo & { accent?: boolean }) {
   return (
-    <Link to={to} className="group block">
+    <Link
+      to={to}
+      className={`group block ${accent ? 'transition-transform duration-300 hover:-translate-y-2.5' : ''}`}
+    >
       <GarmentImage
         src={img}
         alt={label}
         slot={slot}
-        className={`aspect-square w-full transition-transform duration-700 ${accent ? 'group-hover:-translate-y-1.5' : 'group-hover:scale-105'}`}
+        className={`aspect-square w-full transition-transform duration-700 ${accent ? '' : 'group-hover:scale-105'}`}
       />
       <p
-        className={`mt-3 flex items-center gap-1 text-[11px] uppercase tracking-[0.16em] transition-colors ${
-          accent ? 'text-bone/80 group-hover:text-[#C9A24B]' : 'text-bone/80 group-hover:text-bone'
+        className={`mt-3 flex items-center gap-1 uppercase tracking-[0.16em] transition-colors ${
+          accent
+            ? 'justify-center text-center text-xs text-bone/80 group-hover:text-[#C9A24B]'
+            : 'text-[11px] text-bone/80 group-hover:text-bone'
         }`}
       >
         {label} <span aria-hidden>↗</span>
