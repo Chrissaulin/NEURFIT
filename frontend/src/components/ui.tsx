@@ -4,6 +4,7 @@ import { Footprints, Layers, Shirt, ShoppingBag } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { colourHex, USAGE_LABEL, type Slot, type Usage } from '../types'
 import { EASE } from '../lib/motion'
+import { resolveImage } from '../lib/images'
 
 const SLOT_ICON = {
   top: Shirt,
@@ -35,7 +36,7 @@ export function GarmentImage({
     <div className={`relative overflow-hidden bg-studio ${className}`}>
       {src && !failed ? (
         <img
-          src={src}
+          src={resolveImage(src)}
           alt={alt}
           loading="lazy"
           onError={() => setFailed(true)}
@@ -109,7 +110,7 @@ export function ColourDot({ colour }: { colour: string }) {
 
 export function UsageTag({ usage }: { usage: Usage }) {
   return (
-    <span className="rounded-full border border-bone/20 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-bone/70">
+    <span className="self-start rounded-full border border-bone/20 px-2 py-0.5 text-[10px] uppercase tracking-[0.16em] text-bone/70">
       {USAGE_LABEL[usage]}
     </span>
   )

@@ -60,5 +60,9 @@ export const t = {
     missing: 'Lengkapi Atasan, Bawahan, dan Sepatu dulu.',
     reason: 'Alasan harmoni',
     utama: 'UTAMA',
+    save: 'SIMPAN OUTFIT',
+    savedCta: 'TERSIMPAN',
+    savedTitle: 'OUTFIT TERSIMPAN',
+    deleteOutfit: 'Hapus outfit tersimpan',
   },
 }

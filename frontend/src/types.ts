@@ -9,7 +9,17 @@ export interface Item {
   usage: Usage
   slot: Slot
   image_url?: string
+  thumb_url?: string
+  cutout_url?: string
   confidence?: number
+}
+
+export interface SavedOutfit {
+  id: string
+  item_ids: string[]
+  usage: Usage | 'all'
+  score: number
+  created_at: number
 }
 
 export const SLOTS: Slot[] = ['top', 'bottom', 'shoes', 'accessory']
