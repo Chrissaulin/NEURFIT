@@ -102,46 +102,39 @@ export default function HomePage() {
 
   return (
     <div>
-      <div className="mx-auto max-w-[1440px] px-4 pb-8 pt-6 sm:px-6 sm:pb-12 sm:pt-8 lg:px-10">
-        <div className="relative hidden aspect-[1.9/1] lg:block">
-          <Reveal className="absolute left-[8%] top-[14%] w-[71%]">
-            <HeroImage src="/demo/mainmenu-1.jpg" alt="Koleksi editorial NeurFit" className="aspect-[2.4/1] w-full" imgClassName="object-[center_28%]" />
-          </Reveal>
-          <Reveal delay={0.1} x={60} className="absolute right-0 top-0 z-20 w-[20%]">
-            <HeroImage src="/demo/mainmenu-2.jpg" alt="Detail gaya jalanan" className="aspect-square w-full" />
-          </Reveal>
-          <Reveal delay={0.2} x={-60} className="absolute left-0 top-[27%] z-20 w-[17.5%]">
-            <HeroImage src="/demo/mainmenu-3.jpg" alt="Gaya kasual" className="aspect-square w-full" />
-          </Reveal>
-          <Reveal delay={0.3} className="absolute bottom-0 left-[41%] z-30 w-[35%]">
-            <div className="grid grid-cols-2">
-              <div className="flex aspect-square flex-col justify-between border-r border-coal/10 bg-bone/95 p-4 text-coal sm:p-5">
-                <HeroCopy />
-              </div>
-              <HeroImage src="/demo/mainmenu-4.jpg" alt="Rak pakaian" className="aspect-square w-full" />
-            </div>
-          </Reveal>
-        </div>
-
-        <div className="space-y-3 lg:hidden">
+      <div className="mx-auto w-full max-w-[1440px] px-6 pb-20 pt-8 md:px-12">
+        <div className="relative mx-auto w-[84%] max-w-[1200px]">
           <Reveal>
-            <HeroImage src="/demo/mainmenu-1.jpg" alt="Koleksi editorial NeurFit" className="aspect-[4/3] w-full" />
+            <HeroImage
+              src="/demo/mainmenu-1.jpg"
+              alt="Koleksi editorial NeurFit"
+              className="aspect-[12/5] min-h-[340px] max-h-[490px] w-full bg-[#262624]"
+              imgClassName="object-center grayscale contrast-[1.1]"
+            />
           </Reveal>
-          <div className="grid grid-cols-2 gap-3">
-            <Reveal delay={0.1}>
-              <HeroImage src="/demo/mainmenu-2.jpg" alt="Detail gaya jalanan" className="aspect-square w-full" />
-            </Reveal>
-            <Reveal delay={0.2}>
-              <HeroImage src="/demo/mainmenu-3.jpg" alt="Gaya kasual" className="aspect-square w-full" />
-            </Reveal>
-          </div>
-          <Reveal delay={0.3}>
-            <div className="grid grid-cols-2">
-              <div className="flex aspect-square flex-col justify-between border-r border-coal/10 bg-bone/95 p-4 text-coal">
-                <HeroCopy size="sm" />
-              </div>
-              <HeroImage src="/demo/mainmenu-4.jpg" alt="Rak pakaian" className="aspect-square w-full" />
+
+          <Reveal
+            delay={0.1}
+            className="absolute left-[-6.5%] top-[18%] z-20 hidden aspect-square w-[21%] min-w-[140px] max-w-[235px] overflow-hidden bg-[#232321] shadow-[0_20px_50px_rgba(0,0,0,0.75)] sm:block"
+          >
+            <img src="/demo/mainmenu-2.jpg" alt="Sepatu monokrom" className="h-full w-full object-cover grayscale contrast-[1.1]" />
+          </Reveal>
+
+          <Reveal
+            delay={0.2}
+            className="absolute right-[-5.5%] top-[-14%] z-20 hidden aspect-square w-[21%] min-w-[140px] max-w-[235px] overflow-hidden bg-[#141413] shadow-[0_20px_50px_rgba(0,0,0,0.75)] sm:block"
+          >
+            <img src="/demo/mainmenu-3.jpg" alt="Sweatshirt gelap" className="h-full w-full object-cover grayscale contrast-[1.1]" />
+          </Reveal>
+
+          <Reveal
+            delay={0.3}
+            className="relative z-30 mt-3 grid w-full grid-cols-2 xl:absolute xl:-bottom-[16%] xl:left-[41%] xl:mt-0 xl:w-[35%]"
+          >
+            <div className="flex aspect-square flex-col justify-between bg-bone/95 p-4 text-coal sm:p-5">
+              <HeroCopy />
             </div>
+            <HeroImage src="/demo/mainmenu-4.jpg" alt="Aksesoris" className="aspect-square w-full" />
           </Reveal>
         </div>
       </div>
