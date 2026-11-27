@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+@layer base {
+  body {
+    @apply bg-bone font-mono text-coal antialiased;
+  }
+
+  a,
+  button {
+    transition: color 180ms ease;
+  }
+}
+
+a:hover,
+button:hover {
+  color: #c9a24b;
+}
+
+::selection {
+  @apply bg-coal text-bone;
+}
+
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.mojave-distressed-surface {
+  position: relative;
+  color-scheme: dark;
+  background-color: #181817;
+  background-image:
+    linear-gradient(rgba(24, 24, 23, 0.4), rgba(24, 24, 23, 0.6)),
+    url('/demo/background.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.mojave-grain {
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@layer components {
+  .eyebrow {
+    @apply font-mono text-[11px] font-bold uppercase tracking-[0.28em] sm:text-sm;
+  }
+  .glass-pill {
+    @apply rounded-full border border-[#3E3E3B]/70 bg-[#2C2C2A]/80 backdrop-blur-md;
+  }
+  .card-sharp {
+    @apply rounded-none border border-[#EDE9DA]/15 bg-card;
+  }
+  .link-arrow {
+    @apply font-mono uppercase tracking-[0.16em];
+  }
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  gap: 1.25rem;
+  animation: marquee 46s linear infinite;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-slow {
+  animation: spin-slow 16s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .spin-slow {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
