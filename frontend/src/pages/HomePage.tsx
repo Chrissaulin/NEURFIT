@@ -91,6 +91,7 @@ function PhotoCard({ img, label, slot, to, accent = false }: Photo & { accent?: 
         src={img}
         alt={label}
         slot={slot}
+        colourOnHover={accent}
         className={`aspect-square w-full transition-transform duration-700 ${accent ? '' : 'group-hover:scale-105'}`}
       />
       <p

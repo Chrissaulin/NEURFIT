@@ -24,12 +24,14 @@ export function GarmentImage({
   slot,
   className = '',
   colour = false,
+  colourOnHover = false,
 }: {
   src?: string
   alt: string
   slot: Slot
   className?: string
   colour?: boolean
+  colourOnHover?: boolean
 }) {
   const [failed, setFailed] = useState(false)
   return (
@@ -40,7 +42,9 @@ export function GarmentImage({
           alt={alt}
           loading="lazy"
           onError={() => setFailed(true)}
-          className={`h-full w-full object-cover ${colour ? '' : 'grayscale contrast-[1.1]'}`}
+          className={`h-full w-full object-cover transition-[filter] duration-500 ${
+            colour ? '' : `grayscale contrast-[1.1] ${colourOnHover ? 'group-hover:grayscale-0' : ''}`
+          }`}
         />
       ) : (
         <div className="grid h-full w-full place-items-center">
