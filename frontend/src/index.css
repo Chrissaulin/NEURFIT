@@ -24,10 +24,11 @@ body {
   color-scheme: dark;
   background-color: #181817;
   background-image:
-    radial-gradient(ellipse 80% 45% at 15% 12%, rgba(35, 35, 33, 0.9) 0%, transparent 65%),
-    radial-gradient(ellipse 70% 50% at 85% 32%, rgba(35, 35, 33, 0.75) 0%, transparent 60%),
-    radial-gradient(ellipse 90% 55% at 50% 68%, rgba(16, 16, 15, 0.85) 0%, transparent 70%),
-    radial-gradient(ellipse 75% 40% at 25% 92%, rgba(35, 35, 33, 0.8) 0%, transparent 65%);
+    linear-gradient(rgba(24, 24, 23, 0.4), rgba(24, 24, 23, 0.6)),
+    url('/demo/background.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
 }
 
 .mojave-grain {

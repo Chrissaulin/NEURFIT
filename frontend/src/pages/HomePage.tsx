@@ -60,6 +60,27 @@ function Section({ children, className = '' }: { children: ReactNode; className?
   )
 }
 
+function HeroImage({ src, alt, className = '', imgClassName = '' }: { src: string; alt: string; className?: string; imgClassName?: string }) {
+  return (
+    <div className={`overflow-hidden bg-studio ${className}`}>
+      <img src={src} alt={alt} className={`h-full w-full object-cover ${imgClassName}`} />
+    </div>
+  )
+}
+
+function HeroCopy({ size = 'lg' }: { size?: 'lg' | 'sm' }) {
+  return (
+    <>
+      <p className={`font-slab uppercase leading-none ${size === 'lg' ? 'text-lg sm:text-xl' : 'text-base'}`}>
+        Explore your true style
+      </p>
+      <p className={`font-mono uppercase tracking-[0.16em] text-coal/60 ${size === 'lg' ? 'text-[9px]' : 'text-[8px]'}`}>
+        Dress like yourself
+      </p>
+    </>
+  )
+}
+
 function PhotoCard({ img, label, slot, to }: Photo) {
   return (
     <Link to={to} className="group block">
@@ -81,30 +102,49 @@ export default function HomePage() {
 
   return (
     <div>
-      <Section className="pt-10 sm:pt-14">
-        <div className="relative mx-auto max-w-5xl">
-          <Reveal>
-            <GarmentImage src="/demo/top-3.jpg" alt="Editorial" slot="top" className="aspect-[16/10] w-full" />
+      <div className="mx-auto max-w-[1440px] px-4 pb-8 pt-6 sm:px-6 sm:pb-12 sm:pt-8 lg:px-10">
+        <div className="relative hidden h-[520px] lg:block xl:h-[620px]">
+          <Reveal className="absolute left-[8%] top-[7%] w-[70%]">
+            <HeroImage src="/demo/mainmenu-1.jpg" alt="Koleksi editorial NeurFit" className="aspect-[2.2/1] w-full" imgClassName="object-[center_28%]" />
           </Reveal>
-          <Reveal delay={0.15} x={-80} className="absolute -left-4 top-1/2 hidden w-36 -translate-y-1/2 sm:block lg:-left-14 lg:w-48">
-            <GarmentImage src="/demo/shoes-1.jpg" alt="Shoes" slot="shoes" className="aspect-square w-full border border-bone/15" />
+          <Reveal delay={0.1} x={60} className="absolute right-0 top-0 z-20 w-[17%]">
+            <HeroImage src="/demo/mainmenu-2.jpg" alt="Detail gaya jalanan" className="aspect-square w-full" />
           </Reveal>
-          <Reveal delay={0.25} x={80} className="absolute -right-4 -top-6 hidden w-36 sm:block lg:-right-14 lg:w-48">
-            <GarmentImage src="/demo/shoes-2.jpg" alt="Shoes" slot="shoes" className="aspect-square w-full border border-bone/15" />
+          <Reveal delay={0.2} x={-60} className="absolute bottom-[28%] left-0 z-20 w-[18%]">
+            <HeroImage src="/demo/mainmenu-3.jpg" alt="Gaya kasual" className="aspect-square w-full" />
           </Reveal>
-          <Reveal delay={0.35} className="relative mx-auto -mt-12 w-[92%] max-w-[460px] sm:-mt-16">
-            <div className="grid grid-cols-2 border border-bone/15 bg-coal/85 backdrop-blur">
-              <div className="flex flex-col justify-center p-5">
-                <p className="font-slab text-xl uppercase leading-none">EXPLORE YOUR TRUE STYLE</p>
-                <p className="mt-3 text-[9px] uppercase tracking-[0.16em] text-muted">
-                  CNN AUTO-TAGGING &amp; BI-LSTM MIX-AND-MATCH ↗
-                </p>
+          <Reveal delay={0.3} className="absolute bottom-0 left-[40%] z-30 w-[38%]">
+            <div className="relative">
+              <HeroImage src="/demo/mainmenu-4.jpg" alt="Rak pakaian" className="aspect-[16/10] w-full" />
+              <div className="absolute inset-y-0 left-0 flex w-[48%] flex-col justify-between bg-bone/95 p-4 text-coal sm:p-5">
+                <HeroCopy />
               </div>
-              <GarmentImage src="/demo/bottom-2.jpg" alt="Rail" slot="bottom" className="aspect-square w-full" />
             </div>
           </Reveal>
         </div>
-      </Section>
+
+        <div className="space-y-3 lg:hidden">
+          <Reveal>
+            <HeroImage src="/demo/mainmenu-1.jpg" alt="Koleksi editorial NeurFit" className="aspect-[4/3] w-full" />
+          </Reveal>
+          <div className="grid grid-cols-2 gap-3">
+            <Reveal delay={0.1}>
+              <HeroImage src="/demo/mainmenu-2.jpg" alt="Detail gaya jalanan" className="aspect-square w-full" />
+            </Reveal>
+            <Reveal delay={0.2}>
+              <HeroImage src="/demo/mainmenu-3.jpg" alt="Gaya kasual" className="aspect-square w-full" />
+            </Reveal>
+          </div>
+          <Reveal delay={0.3}>
+            <div className="relative">
+              <HeroImage src="/demo/mainmenu-4.jpg" alt="Rak pakaian" className="aspect-[16/11] w-full" />
+              <div className="absolute inset-y-0 left-0 flex w-[56%] flex-col justify-between bg-bone/95 p-4 text-coal">
+                <HeroCopy size="sm" />
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </div>
 
       <div className="px-4 pb-6 sm:px-6 sm:pb-10 lg:px-10">
         <Reveal>
