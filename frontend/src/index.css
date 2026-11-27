@@ -6,8 +6,20 @@ html {
   scroll-behavior: smooth;
 }
 
-body {
-  @apply bg-bone font-mono text-coal antialiased;
+@layer base {
+  body {
+    @apply bg-bone font-mono text-coal antialiased;
+  }
+
+  a,
+  button {
+    transition: color 180ms ease;
+  }
+}
+
+a:hover,
+button:hover {
+  color: #c9a24b;
 }
 
 ::selection {

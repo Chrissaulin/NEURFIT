@@ -49,7 +49,7 @@ export default function ItemCard({
         <div className="mt-auto flex items-center gap-2">
           <Link
             to={`/mix?anchor=${item.id}`}
-            className="link-arrow flex flex-1 items-center justify-center gap-1 border border-bone/15 px-3 py-2 text-[10px] text-bone/80 transition-colors hover:border-bone/55 hover:text-bone"
+            className="link-arrow flex flex-1 items-center justify-center gap-1 border border-bone/15 px-3 py-2 text-[10px] text-bone/80 transition-colors hover:border-bone/55 hover:text-[#C9A24B]"
           >
             {t.closet.style} <ArrowUpRight className="h-3 w-3" />
           </Link>

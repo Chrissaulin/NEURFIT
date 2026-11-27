@@ -1,8 +1,9 @@
 import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronRight } from 'lucide-react'
 import type { Slot } from '../types'
-import { Reveal } from '../lib/motion'
+import { EASE, Reveal } from '../lib/motion'
 import { Eyebrow, GarmentImage } from '../components/ui'
 
 type Photo = { label: string; img: string; slot: Slot; to: string }
@@ -98,7 +99,7 @@ function PhotoCard({ img, label, slot, to, accent = false }: Photo & { accent?: 
         className={`mt-3 flex items-center gap-1 uppercase tracking-[0.16em] transition-colors ${
           accent
             ? 'justify-center text-center text-xs text-bone/80 group-hover:text-[#C9A24B]'
-            : 'text-[11px] text-bone/80 group-hover:text-bone'
+            : 'text-[11px] text-bone/80 group-hover:text-[#C9A24B]'
         }`}
       >
         {label} <span aria-hidden>↗</span>
@@ -184,44 +185,55 @@ export default function HomePage() {
         </div>
 
         <Reveal delay={0.15} className="mt-10">
-          <div className="relative overflow-hidden rounded-[24px] border border-bone/15">
-            <GarmentImage
-              src={model === 0 ? '/demo/top-2.jpg' : '/demo/shoes-3.jpg'}
-              alt="Teknologi inti"
-              slot={model === 0 ? 'top' : 'shoes'}
-              className="aspect-[16/9] w-full"
-            />
-            <div
-              className="absolute inset-0"
-              style={{ background: 'linear-gradient(to top, rgba(24,24,23,0.95), rgba(24,24,23,0.2) 55%, transparent)' }}
-            />
-            <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-4 p-5 sm:p-8">
-              <div className="max-w-lg">
-                <p className="eyebrow text-bone/60">{model === 0 ? 'MODEL 01' : 'MODEL 02'}</p>
-                <h3 className="mt-2 font-slab uppercase text-2xl sm:text-4xl">
-                  {model === 0 ? 'MobileNetV2 CNN' : 'Bi-LSTM Compatibility'}
-                </h3>
-                <p className="mt-2 text-xs leading-relaxed text-bone/70 sm:text-sm">
-                  {model === 0
-                    ? 'Auto-tagging jenis, warna, dan acara dari satu forward pass; embedding 256 dimensi.'
-                    : 'Menilai kecocokan outfit dari embedding visual dengan pasangan positif/negatif.'}
-                </p>
-                <Link
-                  to={model === 0 ? '/upload' : '/mix'}
-                  className="mt-4 inline-flex items-center gap-1 rounded-full bg-bone px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-coal"
-                >
-                  {model === 0 ? 'UJI AUTO-TAGGING' : 'BUKA MIX & MATCH'} <span aria-hidden>↗</span>
-                </Link>
-              </div>
-              <button
-                type="button"
-                aria-label="Ganti model"
-                onClick={() => setModel((value) => (value === 0 ? 1 : 0))}
-                className="glass-pill grid h-11 w-11 place-items-center text-bone"
+          <div className="relative aspect-[16/9] overflow-hidden rounded-[24px] border border-bone/15 bg-studio">
+            <AnimatePresence initial={false}>
+              <motion.div
+                key={model}
+                className="absolute inset-0"
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '-100%' }}
+                transition={{ duration: 0.4, ease: EASE }}
               >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </div>
+                <GarmentImage
+                  src={model === 0 ? '/demo/top-2.jpg' : '/demo/shoes-3.jpg'}
+                  alt="Teknologi inti"
+                  slot={model === 0 ? 'top' : 'shoes'}
+                  className="h-full w-full"
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{ background: 'linear-gradient(to top, rgba(24,24,23,0.95), rgba(24,24,23,0.2) 55%, transparent)' }}
+                />
+                <div className="absolute inset-x-0 bottom-0 p-5 pr-20 sm:p-8 sm:pr-24">
+                  <div className="max-w-lg">
+                    <p className="eyebrow text-bone/60">{model === 0 ? 'MODEL 01' : 'MODEL 02'}</p>
+                    <h3 className="mt-2 font-slab uppercase text-2xl sm:text-4xl">
+                      {model === 0 ? 'MobileNetV2 CNN' : 'Bi-LSTM Compatibility'}
+                    </h3>
+                    <p className="mt-2 text-xs leading-relaxed text-bone/70 sm:text-sm">
+                      {model === 0
+                        ? 'Auto-tagging jenis, warna, dan acara dari satu forward pass; embedding 256 dimensi.'
+                        : 'Menilai kecocokan outfit dari embedding visual dengan pasangan positif/negatif.'}
+                    </p>
+                    <Link
+                      to={model === 0 ? '/upload' : '/mix'}
+                      className="mt-4 inline-flex items-center gap-1 rounded-full bg-bone px-5 py-2.5 text-[11px] font-bold uppercase tracking-[0.16em] text-coal"
+                    >
+                      {model === 0 ? 'UJI AUTO-TAGGING' : 'BUKA MIX & MATCH'} <span aria-hidden>↗</span>
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+            <button
+              type="button"
+              aria-label="Ganti model"
+              onClick={() => setModel((value) => (value === 0 ? 1 : 0))}
+              className="glass-pill absolute bottom-5 right-5 z-10 grid h-11 w-11 place-items-center text-bone sm:bottom-8 sm:right-8"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
           </div>
         </Reveal>
       </Section>
@@ -233,15 +245,15 @@ export default function HomePage() {
         <div className="mt-10 divide-y divide-bone/15 border-y border-bone/15">
           {CATEGORIES.map((category, index) => (
             <Reveal key={category.label} delay={index * 0.05}>
-              <Link to={category.to} className="group flex items-center justify-center gap-4 px-4 py-5 sm:py-7">
+              <Link to={category.to} className="group relative flex items-center justify-center px-4 py-5 sm:py-7">
                 <span
-                  className="font-slab uppercase leading-none transition-transform duration-500 group-hover:-translate-x-2"
+                  className="font-slab uppercase leading-none"
                   style={{ fontSize: 'clamp(1.6rem, 5vw, 3.4rem)' }}
                 >
                   {category.label}
                 </span>
-                <span className="w-16 text-right text-[11px] uppercase tracking-[0.16em] text-muted opacity-0 transition-opacity group-hover:opacity-100">
-                  [{String(category.count).padStart(2, '0')}] ↗
+                <span className="pointer-events-none absolute left-1/2 top-2 z-10 -translate-x-1/2 -translate-y-full scale-90 whitespace-nowrap rounded-full border border-[#C9A24B]/40 bg-coal px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#C9A24B] opacity-0 shadow-[0_10px_30px_rgba(0,0,0,0.55)] transition-all duration-150 ease-out group-hover:scale-100 group-hover:opacity-100">
+                  {String(category.count).padStart(2, '0')} ITEM
                 </span>
               </Link>
             </Reveal>
@@ -293,7 +305,7 @@ export default function HomePage() {
                   />
                   <Link to={module.to} className="group flex flex-1 items-center justify-center gap-2 py-2">
                     <span
-                      className="font-slab uppercase leading-none transition-colors group-hover:text-bone/70"
+                      className="font-slab uppercase leading-none transition-colors group-hover:text-[#C9A24B]"
                       style={{ fontSize: 'clamp(1.4rem, 4.4vw, 3rem)' }}
                     >
                       {module.title}
@@ -362,7 +374,7 @@ export default function HomePage() {
                   <li key={link.label}>
                     <Link
                       to={link.to}
-                      className="text-[11px] uppercase tracking-[0.16em] text-bone/70 hover:text-bone"
+                      className="text-[11px] uppercase tracking-[0.16em] text-bone/70 hover:text-[#C9A24B]"
                     >
                       {link.label}
                     </Link>

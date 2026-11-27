@@ -17,7 +17,7 @@ function NavItem({ to, label, end }: { to: string; label: string; end?: boolean 
       end={end}
       className={({ isActive }) =>
         `relative whitespace-nowrap px-1.5 py-1 text-[10px] uppercase tracking-[0.08em] transition-colors md:px-3 md:text-[11px] md:tracking-[0.16em] ${
-          isActive ? 'font-bold text-bone' : 'text-bone/70 hover:text-bone'
+          isActive ? 'font-bold text-bone' : 'text-bone/70 hover:text-[#C9A24B]'
         }`
       }
     >

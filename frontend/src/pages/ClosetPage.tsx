@@ -62,7 +62,7 @@ export default function ClosetPage() {
             <button
               type="button"
               onClick={reset}
-              className="flex items-center gap-1 rounded-full border border-bone/20 px-4 py-2 text-[10px] uppercase tracking-[0.16em] text-bone/70 hover:border-bone/55 hover:text-bone"
+              className="flex items-center gap-1 rounded-full border border-bone/20 px-4 py-2 text-[10px] uppercase tracking-[0.16em] text-bone/70 hover:border-bone/55 hover:text-[#C9A24B]"
             >
               <RotateCcw className="h-3 w-3" /> {t.closet.reset}
             </button>
@@ -86,7 +86,7 @@ export default function ClosetPage() {
               className={`rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] transition-colors ${
                 slot === s
                   ? 'border-bone bg-bone text-coal'
-                  : 'border-bone/20 text-bone/70 hover:border-bone/55 hover:text-bone'
+                  : 'border-bone/20 text-bone/70 hover:border-bone/55 hover:text-[#C9A24B]'
               }`}
             >
               {s === 'all' ? t.closet.all : SLOT_LABEL[s]}

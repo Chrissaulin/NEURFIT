@@ -138,7 +138,7 @@ export default function UploadPage() {
           className={`border px-2 py-1 text-[9px] uppercase tracking-[0.14em] transition-colors ${
             current === item.value
               ? 'border-bone bg-bone text-coal'
-              : 'border-bone/20 text-bone/60 hover:border-bone/50 hover:text-bone'
+              : 'border-bone/20 text-bone/60 hover:border-bone/50 hover:text-[#C9A24B]'
           }`}
         >
           {item.label}
@@ -191,7 +191,7 @@ export default function UploadPage() {
               <button
                 type="button"
                 onClick={() => inputRef.current?.click()}
-                className="text-[10px] uppercase tracking-[0.16em] text-bone/70 hover:text-bone"
+                className="text-[10px] uppercase tracking-[0.16em] text-bone/70 hover:text-[#C9A24B]"
               >
                 {t.upload.change}
               </button>
@@ -210,7 +210,7 @@ export default function UploadPage() {
                     slot={articleSlot(sample.article)}
                     className="aspect-square w-full border border-bone/10 transition-colors group-hover:border-bone/40"
                   />
-                  <span className="mt-1 block text-[8px] uppercase tracking-[0.12em] text-muted group-hover:text-bone">
+                  <span className="mt-1 block text-[8px] uppercase tracking-[0.12em] text-muted group-hover:text-[#C9A24B]">
                     {sample.label}
                   </span>
                 </button>
