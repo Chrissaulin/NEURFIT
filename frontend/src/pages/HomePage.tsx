@@ -32,12 +32,12 @@ const CATEGORIES = [
   { label: 'SEMUA KOLEKSI', count: 10, to: '/closet' },
 ]
 
-const LOOKBOOK = [
-  { label: 'LOOK 01', img: '/demo/top-1.jpg', slot: 'top' as Slot, rotate: '-rotate-6' },
-  { label: 'LOOK 02', img: '/demo/top-3.jpg', slot: 'top' as Slot, rotate: '-rotate-3' },
-  { label: 'LOOK 03', img: '/demo/top-2.jpg', slot: 'top' as Slot, rotate: 'rotate-0' },
-  { label: 'LOOK 04', img: '/demo/bottom-2.jpg', slot: 'bottom' as Slot, rotate: 'rotate-3' },
-  { label: 'LOOK 05', img: '/demo/shoes-1.jpg', slot: 'shoes' as Slot, rotate: 'rotate-6' },
+const LOOKBOOK: { img: string; alt: string; position: string; className: string; imgClassName?: string }[] = [
+  { img: '/demo/mainmenu-1.jpg', alt: 'Lookbook editorial 01', position: 'center 25%', className: 'z-10 -rotate-[8deg] translate-y-12 md:translate-y-16' },
+  { img: '/demo/mainmenu-3.jpg', alt: 'Lookbook editorial 02', position: 'center 35%', className: 'z-20 -ml-5 sm:-ml-7 md:-ml-9 -rotate-[4deg] translate-y-4 md:translate-y-5' },
+  { img: '/demo/mainmenu-4.jpg', alt: 'Lookbook editorial 03', position: 'center', className: 'z-30 -ml-5 sm:-ml-7 md:-ml-9 rotate-0 -translate-y-3 md:-translate-y-4' },
+  { img: '/demo/mainmenu-2.jpg', alt: 'Lookbook editorial 04', position: 'center 70%', className: 'z-20 -ml-5 sm:-ml-7 md:-ml-9 rotate-[4deg] translate-y-4 md:translate-y-5' },
+  { img: '/demo/mainmenu-1.jpg', alt: 'Lookbook editorial 05', position: 'center 20%', className: 'z-10 -ml-5 sm:-ml-7 md:-ml-9 rotate-[8deg] translate-y-12 md:translate-y-16', imgClassName: 'scale-[2.3] origin-[50%_18%]' },
 ]
 
 const MODULES = [
@@ -265,25 +265,21 @@ export default function HomePage() {
         <Reveal>
           <Eyebrow className="text-center">LOOKBOOK OUTFIT ’26</Eyebrow>
         </Reveal>
-        <div className="mt-12 overflow-x-auto pb-6">
-          <div className="flex justify-center -space-x-4 sm:-space-x-8">
-            {LOOKBOOK.map((look, index) => (
-              <Reveal key={look.label} delay={index * 0.06}>
-                <div
-                  className={`relative w-32 shrink-0 transition-all duration-500 hover:z-10 hover:rotate-0 hover:scale-105 sm:w-52 ${look.rotate}`}
-                >
-                  <GarmentImage
-                    src={look.img}
-                    alt={look.label}
-                    slot={look.slot}
-                    colour
-                    className="aspect-[3/4] w-full border border-bone/15"
-                  />
-                  <p className="mt-2 text-center text-[9px] uppercase tracking-[0.16em] text-muted">{look.label}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
+        <div id="lookbook" className="relative mx-auto flex max-w-[960px] items-center justify-center px-4 pb-20 pt-6">
+          {LOOKBOOK.map((look, index) => (
+            <div
+              key={`${look.img}-${index}`}
+              className={`w-[150px] shrink-0 overflow-hidden bg-[#232321] shadow-[0_24px_60px_rgba(0,0,0,0.88)] transition-transform duration-500 hover:z-40 hover:scale-105 sm:w-[195px] md:w-[225px] aspect-[3/4] ${look.className}`}
+            >
+              <img
+                src={look.img}
+                alt={look.alt}
+                loading="lazy"
+                className={`h-full w-full object-cover object-center ${look.imgClassName ?? ''}`}
+                style={{ objectPosition: look.position }}
+              />
+            </div>
+          ))}
         </div>
       </Section>
 
