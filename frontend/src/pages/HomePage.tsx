@@ -103,17 +103,17 @@ export default function HomePage() {
   return (
     <div>
       <div className="mx-auto max-w-[1440px] px-4 pb-8 pt-6 sm:px-6 sm:pb-12 sm:pt-8 lg:px-10">
-        <div className="relative hidden aspect-[1.8/1] lg:block">
-          <Reveal className="absolute left-[8%] top-[5%] w-[71%]">
-            <HeroImage src="/demo/mainmenu-1.jpg" alt="Koleksi editorial NeurFit" className="aspect-[1.63/1] w-full" imgClassName="object-[center_28%]" />
+        <div className="relative hidden aspect-[1.9/1] lg:block">
+          <Reveal className="absolute left-[8%] top-[14%] w-[71%]">
+            <HeroImage src="/demo/mainmenu-1.jpg" alt="Koleksi editorial NeurFit" className="aspect-[2.4/1] w-full" imgClassName="object-[center_28%]" />
           </Reveal>
-          <Reveal delay={0.1} x={60} className="absolute right-0 top-[5%] z-20 w-[20%]">
+          <Reveal delay={0.1} x={60} className="absolute right-0 top-0 z-20 w-[20%]">
             <HeroImage src="/demo/mainmenu-2.jpg" alt="Detail gaya jalanan" className="aspect-square w-full" />
           </Reveal>
-          <Reveal delay={0.2} x={-60} className="absolute left-0 top-[30%] z-20 w-[17.5%]">
+          <Reveal delay={0.2} x={-60} className="absolute left-0 top-[27%] z-20 w-[17.5%]">
             <HeroImage src="/demo/mainmenu-3.jpg" alt="Gaya kasual" className="aspect-square w-full" />
           </Reveal>
-          <Reveal delay={0.3} className="absolute bottom-0 left-[41%] z-30 w-[34%]">
+          <Reveal delay={0.3} className="absolute bottom-0 left-[41%] z-30 w-[35%]">
             <div className="grid grid-cols-2">
               <div className="flex aspect-square flex-col justify-between border-r border-coal/10 bg-bone/95 p-4 text-coal sm:p-5">
                 <HeroCopy />
