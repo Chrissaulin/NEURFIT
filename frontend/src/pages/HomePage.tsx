@@ -81,16 +81,20 @@ function HeroCopy({ size = 'lg' }: { size?: 'lg' | 'sm' }) {
   )
 }
 
-function PhotoCard({ img, label, slot, to }: Photo) {
+function PhotoCard({ img, label, slot, to, accent = false }: Photo & { accent?: boolean }) {
   return (
     <Link to={to} className="group block">
       <GarmentImage
         src={img}
         alt={label}
         slot={slot}
-        className="aspect-square w-full transition-transform duration-700 group-hover:scale-105"
+        className={`aspect-square w-full transition-transform duration-700 ${accent ? 'group-hover:-translate-y-1.5' : 'group-hover:scale-105'}`}
       />
-      <p className="mt-3 flex items-center gap-1 text-[11px] uppercase tracking-[0.16em] text-bone/80 transition-colors group-hover:text-bone">
+      <p
+        className={`mt-3 flex items-center gap-1 text-[11px] uppercase tracking-[0.16em] transition-colors ${
+          accent ? 'text-bone/80 group-hover:text-[#C9A24B]' : 'text-bone/80 group-hover:text-bone'
+        }`}
+      >
         {label} <span aria-hidden>↗</span>
       </p>
     </Link>
@@ -157,7 +161,7 @@ export default function HomePage() {
         <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
           {ARRIVALS.map((photo, index) => (
             <Reveal key={photo.label} delay={index * 0.05}>
-              <PhotoCard {...photo} />
+              <PhotoCard {...photo} accent />
             </Reveal>
           ))}
         </div>
