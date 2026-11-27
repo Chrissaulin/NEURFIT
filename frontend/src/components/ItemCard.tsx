@@ -29,6 +29,7 @@ export default function ItemCard({
           src={item.image_url}
           alt={item.name}
           slot={item.slot}
+          colour
           className="aspect-square w-full transition-transform duration-700 group-hover:scale-105"
         />
       </div>

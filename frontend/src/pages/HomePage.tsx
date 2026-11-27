@@ -82,7 +82,7 @@ function HeroCopy({ size = 'lg' }: { size?: 'lg' | 'sm' }) {
   )
 }
 
-function PhotoCard({ img, label, slot, to, accent = false }: Photo & { accent?: boolean }) {
+function PhotoCard({ img, label, slot, to, accent = false, hoverColour = false }: Photo & { accent?: boolean; hoverColour?: boolean }) {
   return (
     <Link
       to={to}
@@ -92,7 +92,7 @@ function PhotoCard({ img, label, slot, to, accent = false }: Photo & { accent?: 
         src={img}
         alt={label}
         slot={slot}
-        colourOnHover={accent}
+        colourOnHover={accent || hoverColour}
         className={`aspect-square w-full transition-transform duration-700 ${accent ? '' : 'group-hover:scale-105'}`}
       />
       <p
@@ -296,11 +296,12 @@ export default function HomePage() {
             const imageRight = index % 2 === 1
             return (
               <Reveal key={module.title} x={imageRight ? 80 : -80} y={0}>
-                <div className={`flex flex-col items-center gap-4 sm:flex-row ${imageRight ? 'sm:flex-row-reverse' : ''}`}>
+                <div className={`group flex flex-col items-center gap-4 sm:flex-row ${imageRight ? 'sm:flex-row-reverse' : ''}`}>
                   <GarmentImage
                     src={module.img}
                     alt={module.title}
                     slot={module.slot}
+                    colourOnHover
                     className="h-24 w-full border border-bone/15 sm:h-28 sm:w-80 md:w-96"
                   />
                   <Link to={module.to} className="group flex flex-1 items-center justify-center gap-2 py-2">
@@ -328,7 +329,7 @@ export default function HomePage() {
         <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
           {POPULAR.map((photo, index) => (
             <Reveal key={photo.label} delay={index * 0.05}>
-              <PhotoCard {...photo} />
+              <PhotoCard {...photo} hoverColour />
             </Reveal>
           ))}
         </div>
