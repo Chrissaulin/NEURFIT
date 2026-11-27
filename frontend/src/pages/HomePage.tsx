@@ -184,7 +184,7 @@ export default function HomePage() {
           </Reveal>
         </div>
 
-        <Reveal delay={0.15} className="mt-10">
+        <Reveal delay={0.15} className="mx-auto mt-10 w-full max-w-[1100px]">
           <div className="relative aspect-[16/9] overflow-hidden rounded-[24px] border border-bone/15 bg-studio">
             <AnimatePresence initial={false}>
               <motion.div
@@ -247,7 +247,7 @@ export default function HomePage() {
             <Reveal key={category.label} delay={index * 0.05}>
               <Link to={category.to} className="group relative flex items-center justify-center px-4 py-5 sm:py-7">
                 <span
-                  className="font-slab uppercase leading-none"
+                  className="font-slab uppercase leading-none transition-transform duration-150 ease-out group-hover:scale-105"
                   style={{ fontSize: 'clamp(1.6rem, 5vw, 3.4rem)' }}
                 >
                   {category.label}
