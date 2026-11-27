@@ -42,7 +42,7 @@ export function GarmentImage({
           alt={alt}
           loading="lazy"
           onError={() => setFailed(true)}
-          className={`h-full w-full object-cover transition-[filter] duration-500 ${
+          className={`h-full w-full object-cover transition-[filter] duration-300 ${
             colour ? '' : `grayscale contrast-[1.1] ${colourOnHover ? 'group-hover:grayscale-0' : ''}`
           }`}
         />

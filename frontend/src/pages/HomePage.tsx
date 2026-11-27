@@ -93,7 +93,7 @@ function PhotoCard({ img, label, slot, to, accent = false, hoverColour = false }
         alt={label}
         slot={slot}
         colourOnHover={accent || hoverColour}
-        className={`aspect-square w-full transition-transform duration-700 ${accent ? '' : 'group-hover:scale-105'}`}
+        className={`aspect-square w-full transition-transform duration-300 ${accent ? '' : 'group-hover:scale-105'}`}
       />
       <p
         className={`mt-3 flex items-center gap-1 uppercase tracking-[0.16em] transition-colors ${
