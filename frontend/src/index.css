@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-cream font-sans text-ink antialiased;
+}
+
+@layer components {
+  .pill {
+    @apply inline-flex items-center gap-2 rounded-full border border-line bg-white/60 px-4 py-2 text-sm font-medium transition-colors;
+  }
+  .pill-active {
+    @apply border-ink bg-ink text-cream;
+  }
+  .surface {
+    @apply rounded-4xl border border-line bg-white/70;
+  }
+  .cutout {
+    mix-blend-mode: multiply;
+  }
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  gap: 1rem;
+  animation: marquee 38s linear infinite;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
