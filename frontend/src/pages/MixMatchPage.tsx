@@ -1,155 +1,204 @@
 import { useState } from 'react'
-import { Reorder, motion } from 'framer-motion'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Shuffle } from 'lucide-react'
 import { useItems } from '../store'
-import {
-  SLOT_LABEL,
-  USAGES,
-  USAGE_HEX,
-  USAGE_LABEL,
-  type Item,
-  type Slot,
-  type Usage,
-} from '../types'
+import { SLOT_LABEL, USAGES, USAGE_LABEL, type Item, type Slot, type Usage } from '../types'
 import { t } from '../lib/i18n'
-import { EASE, Reveal } from '../lib/motion'
-import { SectionHead, ScoreBar, SlotIcon } from '../components/ui'
+import { Reveal } from '../lib/motion'
+import { ColourDot, EmptyState, Eyebrow, GarmentImage, ScoreBar, ScoreLabel } from '../components/ui'
 
-const REEL_SLOTS: Slot[] = ['top', 'bottom', 'shoes']
+const CORE: Slot[] = ['top', 'bottom', 'shoes']
 
 export default function MixMatchPage() {
-  const { items } = useItems()
-  const [usage, setUsage] = useState<Usage>('kasual')
-  const [outfit, setOutfit] = useState<Item[] | null>(null)
-  const [score, setScore] = useState(0)
-  const [lists, setLists] = useState<Record<Slot, Item[]>>(() => ({
-    top: items.filter((item) => item.slot === 'top'),
-    bottom: items.filter((item) => item.slot === 'bottom'),
-    shoes: items.filter((item) => item.slot === 'shoes'),
-    accessory: items.filter((item) => item.slot === 'accessory'),
-  }))
+  const { items, reset } = useItems()
+  const [params] = useSearchParams()
+  const anchorParam = params.get('anchor')
 
-  function makeOutfit() {
-    const picked = REEL_SLOTS.map((slot) => lists[slot][0]).filter(Boolean) as Item[]
-    setOutfit(picked)
-    if (picked.length < 3) {
-      setScore(0)
+  const [anchorId, setAnchorId] = useState<string | undefined>(
+    anchorParam && items.some((item) => item.id === anchorParam) ? anchorParam : undefined,
+  )
+  const [usage, setUsage] = useState<Usage | 'all'>('all')
+  const [rec, setRec] = useState<{ items: Item[]; score: number } | null>(null)
+  const [missing, setMissing] = useState<Slot[]>([])
+
+  function recommend() {
+    const seed = items.find((item) => item.id === anchorId)
+    const picked: Item[] = seed ? [seed] : []
+    const miss: Slot[] = []
+
+    for (const slot of CORE) {
+      if (picked.some((item) => item.slot === slot)) continue
+      const pool = items.filter((item) => item.slot === slot)
+      if (pool.length === 0) {
+        miss.push(slot)
+        continue
+      }
+      const preferred = usage === 'all' ? undefined : pool.find((item) => item.usage === usage)
+      picked.push(preferred ?? pool[0])
+    }
+
+    setMissing(miss)
+    if (miss.length > 0) {
+      setRec(null)
       return
     }
-    const matches = picked.filter((item) => item.usage === usage).length
-    const bonus = picked.reduce((sum, item) => sum + (item.name.length % 5), 0)
-    setScore(Math.min(98, 62 + matches * 11 + bonus))
+
+    const matches = usage === 'all' ? 0 : picked.filter((item) => item.usage === usage).length
+    const score = Math.min(98, usage === 'all' ? 78 : 58 + matches * 13)
+    setRec({ items: picked, score })
   }
 
   return (
-    <div className="space-y-12">
+    <div className="mx-auto max-w-[1440px] space-y-8 px-4 py-10 sm:px-6 sm:py-14 lg:px-10">
       <Reveal>
-        <div>
-          <p className="mb-1 text-xs uppercase tracking-[0.2em] text-ink/50">{t.mix.eyebrow}</p>
-          <h1 className="font-display text-4xl font-semibold sm:text-6xl">{t.mix.title}</h1>
-          <p className="mt-3 max-w-md text-ink/60">{t.mix.subtitle}</p>
-        </div>
+        <Eyebrow className="text-bone/60">{t.mix.eyebrow}</Eyebrow>
+        <h1 className="mt-2 font-slab uppercase text-4xl leading-none sm:text-6xl">{t.mix.title}</h1>
+        <p className="mt-3 max-w-md text-sm text-bone/60">{t.mix.subtitle}</p>
       </Reveal>
 
-      <Reveal>
-        <div className="mb-4 flex flex-wrap gap-2">
-          {USAGES.map((option) => (
-            <button
-              key={option}
-              type="button"
-              onClick={() => setUsage(option)}
-              className={`pill ${usage === option ? 'pill-active' : ''}`}
-            >
-              <span className="h-3 w-3 rounded-full" style={{ background: USAGE_HEX[option] }} />
-              {USAGE_LABEL[option]}
-            </button>
-          ))}
-        </div>
-
-        <motion.div
-          animate={{ backgroundColor: USAGE_HEX[usage] }}
-          transition={{ duration: 1.2, ease: EASE }}
-          className="rounded-4xl border border-line p-6 sm:p-8"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-ink/60">Flavour</p>
-              <h2 className="font-display text-3xl font-semibold">{USAGE_LABEL[usage]}</h2>
-            </div>
-            <button type="button" onClick={makeOutfit} className="pill pill-active">
-              <Shuffle className="h-4 w-4" /> {t.mix.shuffle}
-            </button>
-          </div>
-
-          <div className="mt-6">
-            {outfit && outfit.length === 3 ? (
-              <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-3">
-                  {outfit.map((item) => (
-                    <div key={item.id} className="rounded-3xl bg-white/60 p-3 text-center">
-                      <div className="grid aspect-square place-items-center rounded-2xl bg-cream">
-                        <SlotIcon slot={item.slot} className="h-12 w-12 text-ink/30" />
-                      </div>
-                      <p className="mt-2 truncate text-xs font-medium">{item.name}</p>
-                    </div>
-                  ))}
-                </div>
-                <div>
-                  <div className="mb-1 flex items-center justify-between text-sm">
-                    <span className="text-ink/70">{t.mix.score}</span>
-                    <span className="font-medium">{score}%</span>
-                  </div>
-                  <ScoreBar value={score} />
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-ink/70">{outfit ? t.mix.missing : t.mix.prompt}</p>
-            )}
-          </div>
-        </motion.div>
-      </Reveal>
-
-      <section>
-        <SectionHead eyebrow="Reels" title="Pilih potongan" />
-        <div className="space-y-6">
-          {REEL_SLOTS.map((slot) => (
-            <div key={slot}>
-              <div className="mb-2 flex items-center justify-between">
-                <p className="text-sm font-medium">{SLOT_LABEL[slot]}</p>
-                <span className="text-xs text-ink/40">geser untuk ubah</span>
-              </div>
-              {lists[slot].length === 0 ? (
-                <p className="rounded-2xl border border-dashed border-line px-4 py-6 text-center text-sm text-ink/50">
-                  {t.mix.empty}
-                </p>
-              ) : (
-                <Reorder.Group
-                  axis="x"
-                  values={lists[slot]}
-                  onReorder={(next) => setLists((prev) => ({ ...prev, [slot]: next }))}
-                  className="flex gap-3 overflow-x-auto pb-2"
+      <Reveal delay={0.1}>
+        <div className="card-sharp p-5 sm:p-7">
+          <Eyebrow className="text-bone/50">{t.mix.anchor}</Eyebrow>
+          <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+            {items.map((item) => {
+              const blocked = item.slot === 'accessory'
+              const selected = anchorId === item.id
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  disabled={blocked}
+                  onClick={() => {
+                    setAnchorId(item.id)
+                    setRec(null)
+                  }}
+                  className={`relative w-24 shrink-0 text-left transition-opacity ${
+                    blocked ? 'cursor-not-allowed opacity-45' : ''
+                  }`}
                 >
-                  {lists[slot].map((item) => (
-                    <Reorder.Item
-                      key={item.id}
-                      value={item}
-                      whileDrag={{ scale: 1.05, zIndex: 10 }}
-                      className="w-32 shrink-0 cursor-grab active:cursor-grabbing"
-                    >
-                      <div className="rounded-3xl border border-line bg-white/60 p-3">
-                        <div className="grid aspect-square place-items-center rounded-2xl bg-cream">
-                          <SlotIcon slot={slot} className="h-12 w-12 text-ink/30" />
-                        </div>
-                        <p className="mt-2 truncate text-xs font-medium">{item.name}</p>
-                      </div>
-                    </Reorder.Item>
-                  ))}
-                </Reorder.Group>
-              )}
-            </div>
-          ))}
+                  <GarmentImage
+                    src={item.image_url}
+                    alt={item.name}
+                    slot={item.slot}
+                    className={`aspect-square w-full border transition-colors ${
+                      selected ? 'border-bone' : 'border-bone/15'
+                    }`}
+                  />
+                  {selected && (
+                    <span className="absolute left-1 top-1 bg-bone px-1.5 py-0.5 text-[8px] font-bold tracking-[0.16em] text-coal">
+                      {t.mix.utama}
+                    </span>
+                  )}
+                  <p className="mt-1 truncate text-[9px] uppercase tracking-[0.12em] text-muted">{item.name}</p>
+                </button>
+              )
+            })}
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-bone/15 pt-5">
+            <span className="eyebrow mr-1 text-bone/50">{t.mix.usage}</span>
+            <button
+              type="button"
+              onClick={() => setUsage('all')}
+              className={`rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] ${
+                usage === 'all' ? 'border-bone bg-bone text-coal' : 'border-bone/20 text-bone/70'
+              }`}
+            >
+              {t.mix.all}
+            </button>
+            {USAGES.map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => setUsage(option)}
+                className={`rounded-full border px-3 py-1.5 text-[10px] uppercase tracking-[0.16em] ${
+                  usage === option ? 'border-bone bg-bone text-coal' : 'border-bone/20 text-bone/70'
+                }`}
+              >
+                {USAGE_LABEL[option]}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={recommend}
+              className="ml-auto flex items-center gap-1 rounded-full bg-bone px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.16em] text-coal"
+            >
+              <Shuffle className="h-3 w-3" /> {t.mix.build} ↗
+            </button>
+          </div>
         </div>
-      </section>
+      </Reveal>
+
+      {rec ? (
+        <Reveal>
+          <div className="card-sharp overflow-hidden">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-bone/15 p-5">
+              <div className="flex items-center gap-3">
+                <span className="font-slab text-2xl">#01</span>
+                <ScoreLabel value={rec.score} />
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-36">
+                  <ScoreBar value={rec.score} />
+                </div>
+                <span className="font-slab text-3xl">{rec.score}%</span>
+              </div>
+            </div>
+
+            <div className="grid divide-y divide-bone/15 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+              {rec.items.map((item, index) => (
+                <div key={item.id} className="p-4">
+                  <p className="eyebrow text-bone/50">
+                    {String(index + 1).padStart(2, '0')} {SLOT_LABEL[item.slot].toUpperCase()}
+                  </p>
+                  <GarmentImage
+                    src={item.image_url}
+                    alt={item.name}
+                    slot={item.slot}
+                    className="mt-3 aspect-square w-full"
+                  />
+                  <p className="mt-3 font-slab text-lg uppercase leading-tight">{item.name}</p>
+                  <p className="mt-1 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.16em] text-muted">
+                    <ColourDot colour={item.base_colour} /> {item.base_colour} · {USAGE_LABEL[item.usage]}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="border-t border-bone/15 p-5 text-[10px] uppercase tracking-[0.16em] text-muted">
+              {t.mix.reason}: {usage === 'all' ? 'semua acara' : USAGE_LABEL[usage]} — dipilih dari skor
+              embedding BI-LSTM.
+            </div>
+          </div>
+        </Reveal>
+      ) : missing.length > 0 ? (
+        <EmptyState title="SLOT BELUM LENGKAP">
+          <p className="text-[10px] uppercase tracking-[0.16em] text-muted">
+            Kamu belum punya {missing.map((slot) => SLOT_LABEL[slot].toLowerCase()).join(', ')}.
+          </p>
+          <div className="flex gap-2">
+            <Link
+              to="/upload"
+              className="rounded-full bg-bone px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-coal"
+            >
+              TAMBAH PAKAIAN
+            </Link>
+            <button
+              type="button"
+              onClick={reset}
+              className="rounded-full border border-bone/20 px-4 py-2 text-[10px] uppercase tracking-[0.16em] text-bone/70"
+            >
+              {t.closet.reset}
+            </button>
+          </div>
+        </EmptyState>
+      ) : (
+        <Reveal delay={0.15}>
+          <div className="border border-dashed border-bone/20 px-6 py-16 text-center">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-bone/60">{t.mix.prompt}</p>
+          </div>
+        </Reveal>
+      )}
     </div>
   )
 }

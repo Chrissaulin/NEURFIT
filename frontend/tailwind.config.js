@@ -4,24 +4,26 @@ export default {
   theme: {
     extend: {
       colors: {
-        cream: '#FBF8F2',
-        ink: '#17140F',
-        line: '#E7E1D6',
-        pistachio: '#D5E5BE',
-        strawberry: '#F3C6C8',
-        lemon: '#F4E6A8',
-        blueberry: '#C9D4EC',
-        apricot: '#F6D3B4',
+        coal: '#181817',
+        bone: '#EDE9DA',
+        card: '#222220',
+        elevated: '#242422',
+        studio: '#1C1C1B',
+        glass: '#2C2C2A',
+        muted: '#B5B1A4',
+        sage: '#9BC2A0',
+        ochre: '#E5B96C',
+        terracotta: '#F0887D',
       },
       fontFamily: {
-        display: ['"Clash Display"', 'Georgia', 'serif'],
-        sans: ['Satoshi', 'system-ui', 'sans-serif'],
+        slab: ['Bevan', 'Arvo', 'serif'],
+        mono: ['"Space Mono"', 'ui-monospace', 'monospace'],
       },
       borderRadius: {
         '4xl': '2rem',
       },
-      transitionTimingFunction: {
-        scoop: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      letterSpacing: {
+        editorial: '0.28em',
       },
     },
   },

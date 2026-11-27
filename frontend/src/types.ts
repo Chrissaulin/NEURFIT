@@ -31,25 +31,32 @@ export const USAGE_LABEL: Record<Usage, string> = {
   pesta: 'Pesta',
 }
 
-export const USAGE_HEX: Record<Usage, string> = {
-  kasual: '#D5E5BE',
-  smart_casual: '#F6D3B4',
-  formal: '#C9D4EC',
-  olahraga: '#F4E6A8',
-  pesta: '#F3C6C8',
-}
-
 const COLOUR_HEX: Record<string, string> = {
-  putih: '#F3EFE6',
-  hitam: '#1C1A17',
+  putih: '#E7E3D6',
+  white: '#E7E3D6',
+  hitam: '#1A1A19',
+  black: '#1A1A19',
   biru: '#3B5C8A',
+  blue: '#3B5C8A',
   navy: '#24344D',
-  krem: '#E6D8BE',
-  cokelat: '#7A5636',
+  krem: '#DED3BB',
+  beige: '#DED3BB',
+  cokelat: '#6E4F33',
+  brown: '#6E4F33',
   abu: '#9A9A94',
+  grey: '#9A9A94',
   hijau: '#5C7A4E',
+  green: '#5C7A4E',
   merah: '#9E3B32',
+  red: '#9E3B32',
   denim: '#4A6B8A',
+  ungu: '#6B4B78',
+  purple: '#6B4B78',
+  silver: '#C9C6BD',
+  copper: '#B06A43',
+  pink: '#D9A7AD',
+  yellow: '#C9A227',
+  orange: '#C77B3A',
 }
 
-export const colourHex = (label: string) => COLOUR_HEX[label.toLowerCase()] ?? '#CFC7B8'
+export const colourHex = (label: string) => COLOUR_HEX[label.toLowerCase()] ?? '#9A9A94'

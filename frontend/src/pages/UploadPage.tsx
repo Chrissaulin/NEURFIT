@@ -3,10 +3,10 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Check, UploadCloud } from 'lucide-react'
 import { useItems } from '../store'
-import { USAGES, USAGE_LABEL, type Usage } from '../types'
+import { USAGES, USAGE_LABEL, type Slot, type Usage } from '../types'
 import { t } from '../lib/i18n'
-import { EASE, Reveal } from '../lib/motion'
-import { ColourDot } from '../components/ui'
+import { Reveal } from '../lib/motion'
+import { ConfidenceBadge, ColourDot, Eyebrow, GarmentImage, ScoreBar } from '../components/ui'
 
 const ARTICLES = [
   { value: 'tshirt', label: 'Kaos', slot: 'top' },
@@ -25,29 +25,46 @@ const ARTICLES = [
   { value: 'sunglasses', label: 'Kacamata', slot: 'accessory' },
 ] as const
 
-const COLOURS = ['putih', 'hitam', 'biru', 'navy', 'krem', 'cokelat', 'abu', 'hijau', 'merah', 'denim']
+const COLOURS = ['putih', 'hitam', 'biru', 'navy', 'krem', 'cokelat', 'abu', 'hijau', 'merah', 'denim', 'ungu', 'copper']
+
+const ALT_ARTICLES = ['tshirt', 'shirt', 'jacket']
+const ALT_COLOURS = ['putih', 'hitam', 'biru']
+const ALT_USAGES: Usage[] = ['kasual', 'smart_casual', 'formal']
 
 type Stage = 'idle' | 'analyzing' | 'review' | 'saved'
+type Conf = { article: number; colour: number; usage: number }
 
-function ConfBar({ label, value }: { label: string; value: number }) {
-  const tone = value >= 0.85 ? 'bg-green-600' : value >= 0.6 ? 'bg-amber-500' : 'bg-red-500'
-  return (
-    <div>
-      <div className="mb-1 flex items-center justify-between text-sm">
-        <span className="text-ink/60">{label}</span>
-        <span className="font-medium">{Math.round(value * 100)}%</span>
-      </div>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-ink/10">
-        <motion.div
-          className={`h-full rounded-full ${tone}`}
-          initial={{ width: 0 }}
-          animate={{ width: `${value * 100}%` }}
-          transition={{ duration: 0.8, ease: EASE }}
-        />
-      </div>
-    </div>
-  )
-}
+const SAMPLES = [
+  {
+    label: 'KAOS ABU KASUAL',
+    img: '/demo/top-2.jpg',
+    article: 'tshirt',
+    colour: 'abu',
+    usage: 'kasual' as Usage,
+    conf: { article: 0.94, colour: 0.88, usage: 0.9 },
+  },
+  {
+    label: 'KEMEJA UNGU FORMAL',
+    img: '/demo/top-1.jpg',
+    article: 'shirt',
+    colour: 'ungu',
+    usage: 'formal' as Usage,
+    conf: { article: 0.9, colour: 0.85, usage: 0.58 },
+  },
+  {
+    label: 'SEPATU LARI PUTIH',
+    img: '/demo/shoes-3.jpg',
+    article: 'sports_shoes',
+    colour: 'putih',
+    usage: 'olahraga' as Usage,
+    conf: { article: 0.88, colour: 0.72, usage: 0.82 },
+  },
+]
+
+const articleSlot = (value: string): Slot =>
+  ARTICLES.find((option) => option.value === value)?.slot ?? 'top'
+const articleLabel = (value: string) =>
+  ARTICLES.find((option) => option.value === value)?.label ?? value
 
 export default function UploadPage() {
   const { add } = useItems()
@@ -57,14 +74,29 @@ export default function UploadPage() {
   const [article, setArticle] = useState('tshirt')
   const [colour, setColour] = useState('putih')
   const [usage, setUsage] = useState<Usage>('kasual')
-  const [conf] = useState({ article: 0.94, colour: 0.71, usage: 0.58 })
+  const [conf, setConf] = useState<Conf>({ article: 0.94, colour: 0.71, usage: 0.58 })
+
+  function revoke() {
+    if (url && url.startsWith('blob:')) URL.revokeObjectURL(url)
+  }
 
   function handleFile(file?: File) {
     if (!file || !file.type.startsWith('image/')) return
-    if (url) URL.revokeObjectURL(url)
+    revoke()
     setUrl(URL.createObjectURL(file))
+    setConf({ article: 0.94, colour: 0.71, usage: 0.58 })
     setStage('analyzing')
     window.setTimeout(() => setStage('review'), 1400)
+  }
+
+  function loadSample(sample: (typeof SAMPLES)[number]) {
+    revoke()
+    setUrl(sample.img)
+    setArticle(sample.article)
+    setColour(sample.colour)
+    setUsage(sample.usage)
+    setConf(sample.conf)
+    setStage('review')
   }
 
   function onDrop(event: DragEvent<HTMLDivElement>) {
@@ -73,173 +105,270 @@ export default function UploadPage() {
   }
 
   function reset() {
-    if (url) URL.revokeObjectURL(url)
+    revoke()
     setUrl(undefined)
     setStage('idle')
   }
 
   function save() {
-    const current = ARTICLES.find((option) => option.value === article) ?? ARTICLES[0]
     add({
       id: crypto.randomUUID(),
-      name: current.label,
+      name: articleLabel(article),
       article_type: article,
       base_colour: colour,
       usage,
-      slot: current.slot,
+      slot: articleSlot(article),
       image_url: url,
       confidence: conf.article,
     })
     setStage('saved')
   }
 
+  const chips = (
+    items: { value: string; label: string }[],
+    current: string,
+    onPick: (value: string) => void,
+  ) => (
+    <div className="mt-2 flex flex-wrap gap-1">
+      {items.map((item) => (
+        <button
+          key={item.value}
+          type="button"
+          onClick={() => onPick(item.value)}
+          className={`border px-2 py-1 text-[9px] uppercase tracking-[0.14em] transition-colors ${
+            current === item.value
+              ? 'border-bone bg-bone text-coal'
+              : 'border-bone/20 text-bone/60 hover:border-bone/50 hover:text-bone'
+          }`}
+        >
+          {item.label}
+        </button>
+      ))}
+    </div>
+  )
+
   return (
-    <div className="space-y-10">
+    <div className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 sm:py-14 lg:px-10">
       <Reveal>
-        <div>
-          <p className="mb-1 text-xs uppercase tracking-[0.2em] text-ink/50">{t.upload.eyebrow}</p>
-          <h1 className="font-display text-4xl font-semibold sm:text-6xl">{t.upload.title}</h1>
-          <p className="mt-3 max-w-md text-ink/60">{t.upload.subtitle}</p>
-        </div>
+        <Eyebrow className="text-bone/60">{t.upload.eyebrow}</Eyebrow>
+        <h1 className="mt-2 font-slab uppercase text-4xl leading-none sm:text-6xl">{t.upload.title}</h1>
+        <p className="mt-3 max-w-md text-sm text-bone/60">{t.upload.subtitle}</p>
       </Reveal>
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        <Reveal>
-          <div
-            onClick={() => inputRef.current?.click()}
-            onDragOver={(event) => event.preventDefault()}
-            onDrop={onDrop}
-            className="surface relative grid aspect-[4/5] cursor-pointer place-items-center overflow-hidden"
-          >
-            {url ? (
-              <img src={url} alt="Pratinjau" className="cutout h-full w-full object-contain p-8" />
-            ) : (
-              <div className="flex flex-col items-center gap-3 px-6 text-center">
-                <UploadCloud className="h-12 w-12 text-ink/30" strokeWidth={1.25} />
-                <p className="text-sm text-ink/60">
-                  {t.upload.drop} <span className="font-medium text-ink">{t.upload.pick}</span>
-                </p>
-              </div>
-            )}
-
-            {stage === 'analyzing' && (
-              <div className="absolute inset-0 grid place-items-center bg-cream/70 backdrop-blur-sm">
-                <div className="flex flex-col items-center gap-3">
-                  <motion.span
-                    className="h-10 w-10 rounded-full border-2 border-ink/20 border-t-ink"
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 0.9, ease: 'linear' }}
-                  />
-                  <p className="text-sm font-medium">{t.upload.analyzing}</p>
+      <div className="mt-8 grid gap-6 lg:grid-cols-12">
+        <Reveal className="space-y-6 lg:col-span-5">
+          <div className="card-sharp">
+            <div
+              onClick={() => inputRef.current?.click()}
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={onDrop}
+              className="relative grid aspect-square cursor-pointer place-items-center overflow-hidden"
+            >
+              {url ? (
+                <img src={url} alt="Pratinjau" className="h-full w-full object-cover grayscale contrast-[1.1]" />
+              ) : (
+                <div className="flex flex-col items-center gap-3 px-6 text-center">
+                  <UploadCloud className="h-12 w-12 text-bone/30" strokeWidth={1.2} />
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-bone/60">
+                    {t.upload.drop} <span className="text-bone">{t.upload.pick}</span>
+                  </p>
                 </div>
-              </div>
-            )}
+              )}
+              {stage === 'analyzing' && (
+                <div className="absolute inset-0 grid place-items-center bg-coal/75 backdrop-blur-sm">
+                  <div className="flex flex-col items-center gap-3">
+                    <motion.span
+                      className="h-9 w-9 rounded-full border-2 border-bone/20 border-t-bone"
+                      animate={{ rotate: 360 }}
+                      transition={{ repeat: Infinity, duration: 0.9, ease: 'linear' }}
+                    />
+                    <p className="text-[10px] uppercase tracking-[0.16em]">{t.upload.analyzing}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center justify-between border-t border-bone/15 p-3">
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="text-[10px] uppercase tracking-[0.16em] text-bone/70 hover:text-bone"
+              >
+                {t.upload.change}
+              </button>
+              <span className="text-[9px] uppercase tracking-[0.14em] text-muted">JPG/PNG · MAKS 8MB</span>
+            </div>
+          </div>
+
+          <div className="card-sharp p-4">
+            <p className="eyebrow text-bone/50">{t.upload.samples}</p>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              {SAMPLES.map((sample) => (
+                <button key={sample.label} type="button" onClick={() => loadSample(sample)} className="group text-left">
+                  <GarmentImage
+                    src={sample.img}
+                    alt={sample.label}
+                    slot={articleSlot(sample.article)}
+                    className="aspect-square w-full border border-bone/10 transition-colors group-hover:border-bone/40"
+                  />
+                  <span className="mt-1 block text-[8px] uppercase tracking-[0.12em] text-muted group-hover:text-bone">
+                    {sample.label}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         </Reveal>
 
-        <Reveal delay={0.1}>
-          {stage === 'saved' ? (
-            <div className="surface flex h-full flex-col items-center justify-center gap-4 p-8 text-center">
-              <div className="grid h-14 w-14 place-items-center rounded-full bg-pistachio">
-                <Check className="h-7 w-7" />
+        <Reveal delay={0.1} className="lg:col-span-7">
+          <div className="card-sharp flex h-full flex-col p-5 sm:p-7">
+            {stage === 'saved' ? (
+              <div className="grid flex-1 place-items-center text-center">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="grid h-14 w-14 place-items-center rounded-full bg-sage/20 text-sage">
+                    <Check className="h-7 w-7" />
+                  </div>
+                  <h2 className="font-slab text-2xl uppercase">{t.upload.saved}</h2>
+                  <p className="text-xs uppercase tracking-[0.16em] text-muted">{t.upload.savedNote}</p>
+                  <div className="mt-2 flex gap-2">
+                    <Link to="/closet" className="rounded-full bg-bone px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-coal">
+                      {t.upload.toCloset}
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={reset}
+                      className="rounded-full border border-bone/20 px-4 py-2 text-[10px] uppercase tracking-[0.16em] text-bone/70"
+                    >
+                      {t.upload.again}
+                    </button>
+                  </div>
+                </div>
               </div>
-              <h2 className="font-display text-2xl font-semibold">{t.upload.saved}</h2>
-              <p className="text-ink/60">{t.upload.savedNote}</p>
-              <div className="mt-2 flex gap-2">
-                <Link to="/closet" className="pill pill-active">
-                  {t.upload.toCloset}
-                </Link>
-                <button type="button" onClick={reset} className="pill">
-                  {t.upload.again}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="surface space-y-5 p-6 sm:p-8">
-              <h2 className="font-display text-2xl font-semibold">
-                {stage === 'idle' ? t.upload.pick : t.upload.review}
-              </h2>
+            ) : (
+              <>
+                <Eyebrow className="text-bone/50">{t.upload.eyebrow}</Eyebrow>
+                <h2 className="mt-2 font-slab text-2xl uppercase sm:text-3xl">{t.upload.review}</h2>
 
-              {stage === 'idle' ? (
-                <p className="text-sm text-ink/60">{t.upload.subtitle}</p>
-              ) : (
-                <>
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <label className="text-sm">
-                      <span className="mb-1 block text-ink/60">{t.upload.article}</span>
+                {stage === 'idle' ? (
+                  <p className="mt-4 max-w-md text-xs leading-relaxed text-bone/60">
+                    Pilih foto atau pakai salah satu contoh cepat di kiri. Model akan mengisi tiga label beserta
+                    tingkat keyakinannya.
+                  </p>
+                ) : (
+                  <div className="mt-5 space-y-5">
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="eyebrow text-bone/50">{t.upload.article}</span>
+                        <ConfidenceBadge value={conf.article} />
+                      </div>
                       <select
                         value={article}
                         onChange={(event) => setArticle(event.target.value)}
-                        className="w-full rounded-xl border border-line bg-white/70 px-3 py-2"
+                        className="mt-2 w-full border border-bone/20 bg-coal px-3 py-2 text-xs uppercase tracking-[0.14em] text-bone"
                       >
                         {ARTICLES.map((option) => (
-                          <option key={option.value} value={option.value}>
+                          <option key={option.value} value={option.value} className="bg-coal">
                             {option.label}
                           </option>
                         ))}
                       </select>
-                    </label>
-                    <label className="text-sm">
-                      <span className="mb-1 block text-ink/60">{t.upload.colour}</span>
+                      {chips(
+                        ALT_ARTICLES.map((value) => ({ value, label: articleLabel(value) })),
+                        article,
+                        setArticle,
+                      )}
+                      <div className="mt-2">
+                        <ScoreBar value={conf.article * 100} />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="eyebrow text-bone/50">{t.upload.colour}</span>
+                        <ConfidenceBadge value={conf.colour} />
+                      </div>
                       <select
                         value={colour}
                         onChange={(event) => setColour(event.target.value)}
-                        className="w-full rounded-xl border border-line bg-white/70 px-3 py-2"
+                        className="mt-2 w-full border border-bone/20 bg-coal px-3 py-2 text-xs uppercase tracking-[0.14em] text-bone"
                       >
                         {COLOURS.map((option) => (
-                          <option key={option} value={option}>
+                          <option key={option} value={option} className="bg-coal">
                             {option}
                           </option>
                         ))}
                       </select>
-                    </label>
-                    <label className="text-sm">
-                      <span className="mb-1 block text-ink/60">{t.upload.usage}</span>
+                      {chips(
+                        ALT_COLOURS.map((value) => ({ value, label: value })),
+                        colour,
+                        setColour,
+                      )}
+                      <div className="mt-2">
+                        <ScoreBar value={conf.colour * 100} />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="eyebrow text-bone/50">{t.upload.usage}</span>
+                        <ConfidenceBadge value={conf.usage} />
+                      </div>
                       <select
                         value={usage}
                         onChange={(event) => setUsage(event.target.value as Usage)}
-                        className="w-full rounded-xl border border-line bg-white/70 px-3 py-2"
+                        className="mt-2 w-full border border-bone/20 bg-coal px-3 py-2 text-xs uppercase tracking-[0.14em] text-bone"
                       >
                         {USAGES.map((option) => (
-                          <option key={option} value={option}>
+                          <option key={option} value={option} className="bg-coal">
                             {USAGE_LABEL[option]}
                           </option>
                         ))}
                       </select>
-                    </label>
-                  </div>
+                      {chips(
+                        ALT_USAGES.map((value) => ({ value, label: USAGE_LABEL[value] })),
+                        usage,
+                        (value) => setUsage(value as Usage),
+                      )}
+                      <div className="mt-2">
+                        <ScoreBar value={conf.usage * 100} />
+                      </div>
+                      {conf.usage < 0.6 && (
+                        <p className="mt-2 text-[10px] uppercase tracking-[0.14em] text-terracotta">
+                          {t.upload.check}: acara di bawah 60%.
+                        </p>
+                      )}
+                    </div>
 
-                  <div className="space-y-3">
-                    <ConfBar label={t.upload.article} value={conf.article} />
-                    <ConfBar label={t.upload.colour} value={conf.colour} />
-                    <ConfBar label={t.upload.usage} value={conf.usage} />
-                    {conf.usage < 0.6 && (
-                      <p className="text-sm text-red-600">
-                        {t.upload.check}: {t.upload.usage} di bawah 60%.
-                      </p>
-                    )}
-                  </div>
+                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-muted">
+                      <ColourDot colour={colour} /> {colour}
+                    </div>
 
-                  <div className="flex items-center gap-2 text-sm text-ink/60">
-                    <ColourDot colour={colour} /> {colour}
+                    <div className="flex gap-2 border-t border-bone/15 pt-4">
+                      <button
+                        type="button"
+                        onClick={reset}
+                        className="rounded-full border border-bone/20 px-4 py-2.5 text-[10px] uppercase tracking-[0.16em] text-bone/70"
+                      >
+                        {t.upload.change}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={save}
+                        className="flex-1 rounded-full bg-bone px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.16em] text-coal"
+                      >
+                        {t.upload.save}
+                      </button>
+                    </div>
                   </div>
+                )}
 
-                  <div className="flex gap-2">
-                    <button type="button" onClick={reset} className="pill">
-                      {t.upload.change}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={save}
-                      className="pill pill-active flex-1 justify-center py-3"
-                    >
-                      {t.upload.save}
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
+                {stage === 'analyzing' && (
+                  <p className="mt-4 text-[10px] uppercase tracking-[0.16em] text-muted">
+                    Menjalankan MobileNetV2…
+                  </p>
+                )}
+              </>
+            )}
+          </div>
         </Reveal>
       </div>
 

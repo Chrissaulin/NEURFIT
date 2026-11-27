@@ -1,6 +1,7 @@
 # --- Data & generated artifacts (large, reproducible) ---
 ml/data/
 ml/artifacts/
+desain/
 
 # --- Backend runtime ---
 backend/uploads/

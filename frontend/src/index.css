@@ -2,30 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: light;
-}
-
 html {
   scroll-behavior: smooth;
 }
 
 body {
-  @apply bg-cream font-sans text-ink antialiased;
+  @apply bg-bone font-mono text-coal antialiased;
+}
+
+::selection {
+  @apply bg-coal text-bone;
+}
+
+.mojave-distressed-surface {
+  position: relative;
+  background-color: #181817;
+  background-image:
+    radial-gradient(ellipse 80% 45% at 15% 12%, rgba(35, 35, 33, 0.9) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 50% at 85% 32%, rgba(35, 35, 33, 0.75) 0%, transparent 60%),
+    radial-gradient(ellipse 90% 55% at 50% 68%, rgba(16, 16, 15, 0.85) 0%, transparent 70%),
+    radial-gradient(ellipse 75% 40% at 25% 92%, rgba(35, 35, 33, 0.8) 0%, transparent 65%);
+}
+
+.mojave-grain {
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 @layer components {
-  .pill {
-    @apply inline-flex items-center gap-2 rounded-full border border-line bg-white/60 px-4 py-2 text-sm font-medium transition-colors;
+  .eyebrow {
+    @apply font-mono text-[11px] font-bold uppercase tracking-[0.28em] sm:text-sm;
   }
-  .pill-active {
-    @apply border-ink bg-ink text-cream;
+  .glass-pill {
+    @apply rounded-full border border-[#3E3E3B]/70 bg-[#2C2C2A]/80 backdrop-blur-md;
   }
-  .surface {
-    @apply rounded-4xl border border-line bg-white/70;
+  .card-sharp {
+    @apply rounded-none border border-[#EDE9DA]/15 bg-card;
   }
-  .cutout {
-    mix-blend-mode: multiply;
+  .link-arrow {
+    @apply font-mono uppercase tracking-[0.16em];
   }
 }
 
@@ -36,8 +52,8 @@ body {
 .marquee-track {
   display: flex;
   width: max-content;
-  gap: 1rem;
-  animation: marquee 38s linear infinite;
+  gap: 1.25rem;
+  animation: marquee 46s linear infinite;
 }
 
 @keyframes marquee {
@@ -46,8 +62,19 @@ body {
   }
 }
 
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-slow {
+  animation: spin-slow 16s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .marquee-track {
+  .marquee-track,
+  .spin-slow {
     animation: none;
   }
   html {

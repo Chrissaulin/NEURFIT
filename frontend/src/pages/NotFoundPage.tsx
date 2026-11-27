@@ -2,11 +2,14 @@ import { Link } from 'react-router-dom'
 
 export default function NotFoundPage() {
   return (
-    <div className="surface grid place-items-center gap-4 px-6 py-24 text-center">
-      <p className="text-xs uppercase tracking-[0.2em] text-ink/50">404</p>
-      <h1 className="font-display text-4xl font-semibold">Halaman tidak ditemukan</h1>
-      <Link to="/closet" className="pill pill-active">
-        Kembali ke lemari
+    <div className="mx-auto max-w-[1440px] px-4 py-24 text-center sm:px-6 lg:px-10">
+      <p className="eyebrow text-bone/50">404</p>
+      <h1 className="mt-3 font-slab uppercase text-4xl sm:text-6xl">HALAMAN TIDAK DITEMUKAN</h1>
+      <Link
+        to="/"
+        className="mt-6 inline-block rounded-full bg-bone px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.16em] text-coal"
+      >
+        KEMBALI KE BERANDA ↗
       </Link>
     </div>
   )

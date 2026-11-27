@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import AppShell from './components/AppShell'
 import { EASE } from './lib/motion'
 import ClosetPage from './pages/ClosetPage'
+import HomePage from './pages/HomePage'
 import MixMatchPage from './pages/MixMatchPage'
 import NotFoundPage from './pages/NotFoundPage'
 import UploadPage from './pages/UploadPage'
@@ -20,7 +21,7 @@ export default function App() {
           transition={{ duration: 0.35, ease: EASE }}
         >
           <Routes location={location}>
-            <Route path="/" element={<Navigate to="/closet" replace />} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/closet" element={<ClosetPage />} />
             <Route path="/upload" element={<UploadPage />} />
             <Route path="/mix" element={<MixMatchPage />} />
