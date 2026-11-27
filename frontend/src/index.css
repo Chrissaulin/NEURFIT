@@ -21,6 +21,7 @@ body {
 
 .mojave-distressed-surface {
   position: relative;
+  color-scheme: dark;
   background-color: #181817;
   background-image:
     radial-gradient(ellipse 80% 45% at 15% 12%, rgba(35, 35, 33, 0.9) 0%, transparent 65%),
