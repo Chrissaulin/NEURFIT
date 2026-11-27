@@ -1156,7 +1156,7 @@ backend/uploads/
 
 | Rute | Halaman | Tab |
 |---|---|---|
-| `/` | Redirect ke `/closet` | — |
+| `/` | **HomePage** — beranda editorial (klik kartu membuka `/mix?anchor=<id>`) | Beranda |
 | `/closet` | **ClosetPage** — Virtual Closet | Lemari |
 | `/upload` | **UploadPage** — Unggah & Auto-Tagging | Tambah |
 | `/mix` | **MixMatchPage** — Mix & Match (`?anchor=<id>` opsional) | Mix & Match |
@@ -1168,7 +1168,7 @@ backend/uploads/
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│ Smart Wardrobe        [ Lemari ] [ Tambah ] [ Mix&Match ]│
+│ NeurFit               [ Lemari ] [ Tambah ] [ Mix&Match ]│
 ├──────────────────────────────────────────────────────────┤
 │ Lemari saya · Atasan 8 · Bawahan 5 · Sepatu 3 · Aksesoris 0│
 │ [Semua][Atasan][Bawahan][Sepatu][Aksesoris]              │
@@ -1207,15 +1207,20 @@ backend/uploads/
 │ 2. Acara  ( Semua | Kasual | Smart Casual | Formal | Olahraga | Pesta ) │
 │                          [ Buat Rekomendasi ]            │
 ├──────────────────────────────────────────────────────────┤
-│ #1  ┌────┐ ┌────┐ ┌────┐        Skor kecocokan  87%      │
-│     │Atas│ │Bwh │ │Spt │        ████████░░  Sangat cocok │
-│ #2  ...                                                  │
+│ #1  ┌──────────────────┐   Skor kecocokan  87%            │
+│     │  KOLASE LOOK     │   ████████░░  Sangat cocok       │
+│     │  atasan+bawahan  │   [ Simpan outfit ]              │
+│     │  +sepatu+aksesori│                                  │
+│     └──────────────────┘                                  │
+│ OUTFIT TERSIMPAN  [mini look] [mini look] ...             │
 └──────────────────────────────────────────────────────────┘
 ```
 
+Setiap kombinasi ditampilkan sebagai **satu frame look** (`OutfitFrame`): foto item berlatar putih digabung dengan `mix-blend-multiply` di atas kertas bone, disusun tumpuk-miring per slot. Tombol **Simpan outfit** menyimpan `item_ids`, `usage`, dan skor. Pada prototipe daftar disimpan di `localStorage` (`SavedOutfitsRepository`); saat backend tersedia, ganti implementasi repositori dengan `POST/GET/DELETE /outfits` tanpa mengubah komponen.
+
 ### 7.4 Komponen React & *State Management*
 
-- **Komponen Utama:** `AppShell`, `NavTabs`, `ToastHost`, `ConfidenceBadge`, `ColorSwatch`, `ScoreBar`, `EmptyState`, `Skeleton`, `ConfirmDialog`, `ErrorBanner`, `ClosetSummary`, `FilterBar`, `ItemGrid`, `ItemCard`, `Dropzone`, `TagReviewForm`, `LabelField`, `AnchorPicker`, `UsageSelector`, `OutfitCard`.
+- **Komponen Utama:** `AppShell`, `NavTabs`, `ToastHost`, `ConfidenceBadge`, `ColorSwatch`, `ScoreBar`, `EmptyState`, `Skeleton`, `ConfirmDialog`, `ErrorBanner`, `ClosetSummary`, `FilterBar`, `ItemGrid`, `ItemCard`, `Dropzone`, `TagReviewForm`, `LabelField`, `AnchorPicker`, `UsageSelector`, `OutfitFrame`, `OutfitCard`.
 - **TanStack Query:** `['labels']` (`staleTime: Infinity`), `['items', filters]`; mutasi `useSaveItem`, `useDeleteItem`, dan `useSeedDemo` meng-*invalidate* `['items']`.
 - **Filter Lemari:** tersinkron ke URL (`useSearchParams`).
 - **Wizard Unggah:** `useReducer` (`idle → preview → analyzing → review → saving → saved | error`).
