@@ -341,7 +341,7 @@ export default function HomePage() {
             <img
               src="/demo/logo.png"
               alt="Logo NeurFit"
-              className="aspect-[16/10] w-full border border-bone/15 bg-studio object-contain p-8"
+              className="aspect-[16/10] w-full object-contain p-8"
             />
           </Reveal>
           <Reveal delay={0.15} className="lg:col-span-7">
