@@ -36,27 +36,27 @@ type Conf = { article: number; colour: number; usage: number }
 
 const SAMPLES = [
   {
-    label: 'KAOS ABU KASUAL',
+    label: 'SWEATER ABU KASUAL',
     img: '/demo/top-2.jpg',
-    article: 'tshirt',
+    article: 'sweater',
     colour: 'abu',
     usage: 'kasual' as Usage,
     conf: { article: 0.94, colour: 0.88, usage: 0.9 },
   },
   {
-    label: 'KEMEJA UNGU FORMAL',
+    label: 'KEMEJA PUTIH FORMAL',
     img: '/demo/top-1.jpg',
     article: 'shirt',
-    colour: 'ungu',
+    colour: 'putih',
     usage: 'formal' as Usage,
     conf: { article: 0.9, colour: 0.85, usage: 0.58 },
   },
   {
-    label: 'SEPATU LARI PUTIH',
+    label: 'PUMPS SILVER PESTA',
     img: '/demo/shoes-3.jpg',
-    article: 'sports_shoes',
-    colour: 'putih',
-    usage: 'olahraga' as Usage,
+    article: 'formal_shoes',
+    colour: 'silver',
+    usage: 'pesta' as Usage,
     conf: { article: 0.88, colour: 0.72, usage: 0.82 },
   },
 ]

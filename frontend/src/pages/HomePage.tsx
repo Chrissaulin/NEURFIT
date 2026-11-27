@@ -8,19 +8,19 @@ import { Eyebrow, GarmentImage } from '../components/ui'
 type Photo = { label: string; img: string; slot: Slot; to: string }
 
 const ARRIVALS: Photo[] = [
-  { label: 'LINEN SHIRT', img: '/demo/top-1.jpg', slot: 'top', to: '/mix?anchor=t2' },
-  { label: 'DENIM JACKET', img: '/demo/top-3.jpg', slot: 'top', to: '/mix?anchor=t3' },
-  { label: 'POLO T-SHIRT', img: '/demo/top-2.jpg', slot: 'top', to: '/mix?anchor=t1' },
-  { label: 'RELAXED JEANS', img: '/demo/bottom-1.jpg', slot: 'bottom', to: '/mix?anchor=b1' },
-  { label: 'COURT SNEAKER', img: '/demo/shoes-1.jpg', slot: 'shoes', to: '/mix?anchor=s1' },
+  { label: 'SWEATER POLKADOT', img: '/demo/top-2.jpg', slot: 'top', to: '/mix?anchor=t2' },
+  { label: 'BOMBER HITAM', img: '/demo/top-3.jpg', slot: 'top', to: '/mix?anchor=t3' },
+  { label: 'KEMEJA PUTIH', img: '/demo/top-1.jpg', slot: 'top', to: '/mix?anchor=t1' },
+  { label: 'JEANS BIRU', img: '/demo/bottom-1.jpg', slot: 'bottom', to: '/mix?anchor=b1' },
+  { label: 'SNEAKERS MERAH', img: '/demo/shoes-1.jpg', slot: 'shoes', to: '/mix?anchor=s1' },
 ]
 
 const POPULAR: Photo[] = [
-  { label: 'TOPS & SHIRTS', img: '/demo/top-2.jpg', slot: 'top', to: '/closet?slot=top' },
-  { label: 'PANTS', img: '/demo/bottom-2.jpg', slot: 'bottom', to: '/closet?slot=bottom' },
-  { label: 'SHORTS & DENIM', img: '/demo/bottom-1.jpg', slot: 'bottom', to: '/closet?slot=bottom' },
-  { label: 'SHOES', img: '/demo/shoes-2.jpg', slot: 'shoes', to: '/closet?slot=shoes' },
-  { label: 'ACCESSORIES', img: '/demo/accessory-1.jpg', slot: 'accessory', to: '/closet?slot=accessory' },
+  { label: 'TOPS & SHIRTS', img: '/demo/top-1.jpg', slot: 'top', to: '/closet?slot=top' },
+  { label: 'TROUSERS', img: '/demo/bottom-2.jpg', slot: 'bottom', to: '/closet?slot=bottom' },
+  { label: 'DENIM', img: '/demo/bottom-1.jpg', slot: 'bottom', to: '/closet?slot=bottom' },
+  { label: 'HEELS', img: '/demo/shoes-3.jpg', slot: 'shoes', to: '/closet?slot=shoes' },
+  { label: 'BAGS', img: '/demo/accessory-1.jpg', slot: 'accessory', to: '/closet?slot=accessory' },
 ]
 
 const CATEGORIES = [
