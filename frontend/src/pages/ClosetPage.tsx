@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Plus, RotateCcw } from 'lucide-react'
 import { useItems } from '../store'
@@ -18,6 +18,10 @@ export default function ClosetPage() {
   )
   const [colour, setColour] = useState('all')
   const [usage, setUsage] = useState<Usage | 'all'>('all')
+
+  useEffect(() => {
+    setSlot(initialSlot && SLOTS.includes(initialSlot) ? initialSlot : 'all')
+  }, [initialSlot])
 
   const colours = useMemo(() => Array.from(new Set(items.map((item) => item.base_colour))), [items])
 

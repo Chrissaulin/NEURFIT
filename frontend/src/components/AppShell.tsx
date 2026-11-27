@@ -36,7 +36,7 @@ function NavItem({ to, label, end }: { to: string; label: string; end?: boolean 
 export default function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-bone">
-      <div className="mojave-distressed-surface relative overflow-hidden rounded-b-[32px] pb-10">
+      <div className="mojave-distressed-surface relative overflow-clip rounded-b-[32px] pb-10">
         <div className="mojave-grain absolute inset-0 z-0" />
 
         <header className="sticky top-0 z-50">
