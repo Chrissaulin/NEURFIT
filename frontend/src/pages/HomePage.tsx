@@ -112,7 +112,7 @@ export default function HomePage() {
             className="text-center font-slab uppercase leading-[0.88] tracking-[-0.02em] text-bone"
             style={{ fontSize: 'clamp(3.3rem, 13.8vw, 13.5rem)' }}
           >
-            WARDROBE
+            NEURFIT
           </h1>
         </Reveal>
       </div>
@@ -284,7 +284,7 @@ export default function HomePage() {
           <Reveal className="lg:col-span-5">
             <GarmentImage
               src="/demo/bottom-1.jpg"
-              alt="Tentang Smart Wardrobe"
+              alt="Tentang NeurFit"
               slot="bottom"
               className="aspect-[16/10] w-full border border-bone/15"
             />
@@ -292,7 +292,7 @@ export default function HomePage() {
           <Reveal delay={0.15} className="lg:col-span-7">
             <Eyebrow>ABOUT US</Eyebrow>
             <p className="mt-4 text-sm leading-[1.9] text-bone/75 sm:text-base">
-              Smart Wardrobe adalah lemari digital yang memahami isi pakaianmu. Model{' '}
+              NeurFit adalah lemari digital yang memahami isi pakaianmu. Model{' '}
               <span className="text-bone">MobileNetV2 CNN</span> membaca foto dan menebak jenis, warna, serta
               acara; <span className="text-bone">Bidirectional LSTM</span> menilai kecocokan antar potongan dari
               embedding visual. Semua berjalan lokal — fotomu tidak pernah meninggalkan perangkat.
@@ -307,7 +307,7 @@ export default function HomePage() {
             className="text-center font-slab uppercase leading-[0.88] tracking-[-0.02em] text-bone"
             style={{ fontSize: 'clamp(3.3rem, 13.8vw, 13.5rem)' }}
           >
-            WARDROBE
+            NEURFIT
           </h2>
         </Reveal>
         <div className="mt-12 grid grid-cols-2 gap-8 border-t border-bone/15 pt-10 sm:grid-cols-4">

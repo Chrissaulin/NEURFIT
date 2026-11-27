@@ -1,5 +1,5 @@
 export const t = {
-  brand: 'WARDROBE',
+  brand: 'NEURFIT',
   nav: {
     home: 'Beranda',
     closet: 'Lemari',

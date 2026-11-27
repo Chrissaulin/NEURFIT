@@ -88,7 +88,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <div className="flex items-center justify-between bg-bone px-6 py-5 text-[10px] uppercase tracking-[0.16em] text-coal sm:px-12">
-        <span>© 2026 SMART WARDROBE</span>
+        <span>© 2026 NEURFIT</span>
         <span className="hidden sm:inline">SURABAYA, INDONESIA</span>
       </div>
     </div>
