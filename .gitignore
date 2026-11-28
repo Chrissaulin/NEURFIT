@@ -1,6 +1,8 @@
 # --- Data & generated artifacts (large, reproducible) ---
 ml/data/
 ml/artifacts/
+dataset/
+NEURFIT/
 desain/
 
 # --- Backend runtime ---
@@ -25,9 +27,13 @@ node_modules/
 frontend/dist/
 .vite/
 
-# --- Environment ---
+# --- Environment & secrets ---
 .env
+.env.*
 !.env.example
+*.pem
+*.key
+credentials*.json
 
 # --- OS / editor ---
 .DS_Store

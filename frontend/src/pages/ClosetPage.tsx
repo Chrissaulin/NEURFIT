@@ -2,14 +2,14 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Plus, RotateCcw } from 'lucide-react'
 import { useItems } from '../store'
-import { SLOTS, SLOT_LABEL, USAGES, USAGE_LABEL, type Slot, type Usage } from '../types'
+import { colourDisplay, SLOTS, SLOT_LABEL, USAGES, USAGE_LABEL, type Slot, type Usage } from '../types'
 import { t } from '../lib/i18n'
 import { Reveal } from '../lib/motion'
 import { EmptyState, Eyebrow } from '../components/ui'
 import ItemCard from '../components/ItemCard'
 
 export default function ClosetPage() {
-  const { items, remove, reset } = useItems()
+  const { items, remove, reset, loading, error } = useItems()
   const [params] = useSearchParams()
   const initialSlot = params.get('slot') as Slot | null
 
@@ -61,8 +61,9 @@ export default function ClosetPage() {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={reset}
-              className="flex items-center gap-1 rounded-full border border-bone/20 px-4 py-2 text-[10px] uppercase tracking-[0.16em] text-bone/70 hover:border-bone/55 hover:text-[#C9A24B]"
+              disabled={loading}
+              onClick={() => void reset()}
+              className="flex items-center gap-1 rounded-full border border-bone/20 px-4 py-2 text-[10px] uppercase tracking-[0.16em] text-bone/70 hover:border-bone/55 hover:text-[#C9A24B] disabled:opacity-50"
             >
               <RotateCcw className="h-3 w-3" /> {t.closet.reset}
             </button>
@@ -75,6 +76,12 @@ export default function ClosetPage() {
           </div>
         </div>
       </Reveal>
+
+      {error && (
+        <div className="mt-6 border border-terracotta/50 bg-terracotta/10 px-4 py-3 text-xs text-terracotta">
+          {error}
+        </div>
+      )}
 
       <Reveal delay={0.1}>
         <div className="mt-8 flex flex-wrap items-center gap-2 border-y border-bone/15 py-4">
@@ -104,7 +111,7 @@ export default function ClosetPage() {
               </option>
               {colours.map((c) => (
                 <option key={c} value={c} className="bg-coal">
-                  {c}
+                  {colourDisplay(c)}
                 </option>
               ))}
             </select>
@@ -127,7 +134,11 @@ export default function ClosetPage() {
       </Reveal>
 
       <div className="mt-8">
-        {visible.length === 0 ? (
+        {loading && items.length === 0 ? (
+          <div className="border border-dashed border-bone/20 px-6 py-16 text-center">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-bone/60">Memuat koleksi dari SQLite…</p>
+          </div>
+        ) : visible.length === 0 ? (
           <EmptyState title={t.closet.noMatch}>
             <button
               type="button"
@@ -145,7 +156,7 @@ export default function ClosetPage() {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {visible.map((item, index) => (
               <Reveal key={item.id} delay={index * 0.04}>
-                <ItemCard item={item} onDelete={remove} />
+                <ItemCard item={item} onDelete={(id) => void remove(id)} />
               </Reveal>
             ))}
           </div>

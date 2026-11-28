@@ -1,127 +1,199 @@
-import { useRef, useState, type DragEvent } from 'react'
+import { useMemo, useRef, useState, type DragEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Check, UploadCloud } from 'lucide-react'
 import { useItems } from '../store'
-import { USAGES, USAGE_LABEL, type Slot, type Usage } from '../types'
+import { colourDisplay, USAGES, USAGE_LABEL, type Slot, type Usage } from '../types'
+import { api } from '../lib/api'
+import { resolveImage } from '../lib/images'
 import { t } from '../lib/i18n'
 import { Reveal } from '../lib/motion'
 import { ConfidenceBadge, ColourDot, Eyebrow, GarmentImage, ScoreBar } from '../components/ui'
 
-const ARTICLES = [
-  { value: 'tshirt', label: 'Kaos', slot: 'top' },
-  { value: 'shirt', label: 'Kemeja', slot: 'top' },
-  { value: 'sweater', label: 'Sweater', slot: 'top' },
-  { value: 'jacket', label: 'Jaket', slot: 'top' },
-  { value: 'jeans', label: 'Jeans', slot: 'bottom' },
-  { value: 'trousers', label: 'Celana', slot: 'bottom' },
-  { value: 'skirt', label: 'Rok', slot: 'bottom' },
-  { value: 'casual_shoes', label: 'Sepatu Kasual', slot: 'shoes' },
-  { value: 'formal_shoes', label: 'Sepatu Formal', slot: 'shoes' },
-  { value: 'sports_shoes', label: 'Sepatu Olahraga', slot: 'shoes' },
-  { value: 'sandals', label: 'Sandal', slot: 'shoes' },
-  { value: 'handbag', label: 'Tas', slot: 'accessory' },
-  { value: 'watch', label: 'Jam', slot: 'accessory' },
-  { value: 'sunglasses', label: 'Kacamata', slot: 'accessory' },
-] as const
+const FALLBACK_ARTICLES: { key: string; display: string; slot: Slot }[] = [
+  { key: 'tshirt', display: 'Kaos', slot: 'top' },
+  { key: 'shirt', display: 'Kemeja', slot: 'top' },
+  { key: 'sweater', display: 'Sweater', slot: 'top' },
+  { key: 'jacket', display: 'Jaket', slot: 'top' },
+  { key: 'jeans', display: 'Jeans', slot: 'bottom' },
+  { key: 'trousers', display: 'Celana Panjang', slot: 'bottom' },
+  { key: 'shorts', display: 'Celana Pendek', slot: 'bottom' },
+  { key: 'skirt', display: 'Rok', slot: 'bottom' },
+  { key: 'casual_shoes', display: 'Sepatu Kasual', slot: 'shoes' },
+  { key: 'formal_shoes', display: 'Sepatu Formal', slot: 'shoes' },
+  { key: 'sports_shoes', display: 'Sepatu Olahraga', slot: 'shoes' },
+  { key: 'sandals', display: 'Sandal', slot: 'shoes' },
+  { key: 'handbag', display: 'Tas Tangan', slot: 'accessory' },
+  { key: 'watch', display: 'Jam Tangan', slot: 'accessory' },
+  { key: 'sunglasses', display: 'Kacamata Hitam', slot: 'accessory' },
+]
 
-const COLOURS = ['putih', 'hitam', 'biru', 'navy', 'krem', 'cokelat', 'abu', 'hijau', 'merah', 'denim', 'ungu', 'copper']
+const FALLBACK_COLOURS = [
+  'black',
+  'white',
+  'grey',
+  'navy_blue',
+  'blue',
+  'brown',
+  'beige',
+  'red',
+  'green',
+  'pink',
+  'yellow',
+  'orange',
+  'purple',
+  'multi',
+]
 
-const ALT_ARTICLES = ['tshirt', 'shirt', 'jacket']
-const ALT_COLOURS = ['putih', 'hitam', 'biru']
-const ALT_USAGES: Usage[] = ['kasual', 'smart_casual', 'formal']
-
-type Stage = 'idle' | 'analyzing' | 'review' | 'saved'
+type Stage = 'idle' | 'analyzing' | 'review' | 'saving' | 'saved'
 type Conf = { article: number; colour: number; usage: number }
 
 const SAMPLES = [
-  {
-    label: 'SWEATER ABU KASUAL',
-    img: '/demo/top-2.jpg',
-    article: 'sweater',
-    colour: 'abu',
-    usage: 'kasual' as Usage,
-    conf: { article: 0.94, colour: 0.88, usage: 0.9 },
-  },
-  {
-    label: 'KEMEJA PUTIH FORMAL',
-    img: '/demo/top-1.jpg',
-    article: 'shirt',
-    colour: 'putih',
-    usage: 'formal' as Usage,
-    conf: { article: 0.9, colour: 0.85, usage: 0.58 },
-  },
-  {
-    label: 'PUMPS SILVER PESTA',
-    img: '/demo/shoes-3.jpg',
-    article: 'formal_shoes',
-    colour: 'silver',
-    usage: 'pesta' as Usage,
-    conf: { article: 0.88, colour: 0.72, usage: 0.82 },
-  },
+  { label: 'SWEATER ABU', img: '/demo/top-2.jpg', slot: 'top' as Slot },
+  { label: 'KEMEJA PUTIH', img: '/demo/top-1.jpg', slot: 'top' as Slot },
+  { label: 'SEPATU HAK', img: '/demo/shoes-3.jpg', slot: 'shoes' as Slot },
 ]
 
-const articleSlot = (value: string): Slot =>
-  ARTICLES.find((option) => option.value === value)?.slot ?? 'top'
-const articleLabel = (value: string) =>
-  ARTICLES.find((option) => option.value === value)?.label ?? value
-
 export default function UploadPage() {
-  const { add } = useItems()
+  const { labels, addFromBackend } = useItems()
   const inputRef = useRef<HTMLInputElement>(null)
   const [stage, setStage] = useState<Stage>('idle')
   const [url, setUrl] = useState<string>()
+  const [tempId, setTempId] = useState<string | null>(null)
   const [article, setArticle] = useState('tshirt')
-  const [colour, setColour] = useState('putih')
-  const [usage, setUsage] = useState<Usage>('kasual')
-  const [conf, setConf] = useState<Conf>({ article: 0.94, colour: 0.71, usage: 0.58 })
+  const [colour, setColour] = useState('white')
+  const [usage, setUsage] = useState<Usage>('casual')
+  const [conf, setConf] = useState<Conf>({ article: 0, colour: 0, usage: 0 })
+  const [altArticles, setAltArticles] = useState<string[]>([])
+  const [altColours, setAltColours] = useState<string[]>([])
+  const [altUsages, setAltUsages] = useState<Usage[]>([])
+  const [supported, setSupported] = useState(true)
+  const [inferenceMs, setInferenceMs] = useState<number | null>(null)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  const articleOptions = useMemo(() => {
+    if (!labels) return FALLBACK_ARTICLES
+    return labels.article_types
+      .filter((entry) => entry.slot !== null && entry.key !== 'other')
+      .map((entry) => ({ key: entry.key, display: entry.display, slot: entry.slot as Slot }))
+  }, [labels])
+
+  const colourOptions = useMemo(() => {
+    if (!labels) return FALLBACK_COLOURS.map((key) => ({ key, display: colourDisplay(key) }))
+    return labels.base_colours.map((entry) => ({ key: entry.key, display: entry.display }))
+  }, [labels])
+
+  const articleLabel = (key: string) =>
+    articleOptions.find((option) => option.key === key)?.display ?? key
+
+  const colourLabel = (key: string) =>
+    colourOptions.find((option) => option.key === key)?.display ?? colourDisplay(key)
 
   function revoke() {
     if (url && url.startsWith('blob:')) URL.revokeObjectURL(url)
   }
 
-  function handleFile(file?: File) {
-    if (!file || !file.type.startsWith('image/')) return
+  async function handleFile(file?: File) {
+    if (!file || !file.type.startsWith('image/')) {
+      setErrorMsg('Pilih file gambar berformat JPG, PNG, atau WEBP.')
+      return
+    }
     revoke()
-    setUrl(URL.createObjectURL(file))
-    setConf({ article: 0.94, colour: 0.71, usage: 0.58 })
+    const previewUrl = URL.createObjectURL(file)
+    setUrl(previewUrl)
+    setErrorMsg(null)
+    setTempId(null)
     setStage('analyzing')
-    window.setTimeout(() => setStage('review'), 1400)
+
+    try {
+      const res = await api.analyzeImage(file)
+      setTempId(res.temp_id)
+      const serverPreview = resolveImage(res.image_url)
+      if (serverPreview) {
+        URL.revokeObjectURL(previewUrl)
+        setUrl(serverPreview)
+      }
+      const predArticle = res.predictions.article_type
+      const predColour = res.predictions.base_colour
+      const predUsage = res.predictions.usage
+
+      const validArticle =
+        predArticle.label !== 'other'
+          ? predArticle.label
+          : (predArticle.top_k.find((k) => k.label !== 'other')?.label ?? 'tshirt')
+
+      setArticle(validArticle)
+      setColour(predColour.label)
+      setUsage(predUsage.label as Usage)
+      setConf({
+        article: predArticle.confidence,
+        colour: predColour.confidence,
+        usage: predUsage.confidence,
+      })
+      setAltArticles(
+        predArticle.top_k.map((k) => k.label).filter((label) => label !== 'other'),
+      )
+      setAltColours(predColour.top_k.map((k) => k.label))
+      setAltUsages(predUsage.top_k.map((k) => k.label as Usage))
+      setSupported(res.supported)
+      setInferenceMs(res.inference_ms)
+      setStage('review')
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : 'Gagal menganalisis gambar di server.')
+      setStage('idle')
+    }
   }
 
-  function loadSample(sample: (typeof SAMPLES)[number]) {
-    revoke()
-    setUrl(sample.img)
-    setArticle(sample.article)
-    setColour(sample.colour)
-    setUsage(sample.usage)
-    setConf(sample.conf)
-    setStage('review')
+  async function loadSample(sample: (typeof SAMPLES)[number]) {
+    setErrorMsg(null)
+    setStage('analyzing')
+    try {
+      const response = await fetch(sample.img)
+      const blob = await response.blob()
+      const file = new File([blob], sample.img.split('/').pop() ?? 'sample.jpg', {
+        type: blob.type || 'image/jpeg',
+      })
+      await handleFile(file)
+    } catch {
+      setErrorMsg('Gagal memuat gambar contoh.')
+      setStage('idle')
+    }
   }
 
   function onDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault()
-    handleFile(event.dataTransfer.files?.[0])
+    void handleFile(event.dataTransfer.files?.[0])
   }
 
   function reset() {
     revoke()
     setUrl(undefined)
+    setTempId(null)
+    setErrorMsg(null)
+    setInferenceMs(null)
     setStage('idle')
   }
 
-  function save() {
-    add({
-      id: crypto.randomUUID(),
-      name: articleLabel(article),
-      article_type: article,
-      base_colour: colour,
-      usage,
-      slot: articleSlot(article),
-      image_url: url,
-      confidence: conf.article,
-    })
-    setStage('saved')
+  async function save() {
+    if (!tempId) {
+      setErrorMsg('Sesi analisis tidak ditemukan. Unggah ulang gambar.')
+      return
+    }
+    setStage('saving')
+    setErrorMsg(null)
+    try {
+      const saved = await api.saveItem({
+        temp_id: tempId,
+        article_type: article,
+        base_colour: colour,
+        usage,
+      })
+      addFromBackend(saved)
+      setStage('saved')
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : 'Gagal menyimpan item ke database.')
+      setStage('review')
+    }
   }
 
   const chips = (
@@ -155,6 +227,12 @@ export default function UploadPage() {
         <p className="mt-3 max-w-md text-sm text-bone/60">{t.upload.subtitle}</p>
       </Reveal>
 
+      {errorMsg && (
+        <div className="mt-6 border border-terracotta/50 bg-terracotta/10 px-4 py-3 text-xs text-terracotta">
+          {errorMsg}
+        </div>
+      )}
+
       <div className="mt-8 grid gap-6 lg:grid-cols-12">
         <Reveal className="space-y-6 lg:col-span-5">
           <div className="card-sharp">
@@ -165,7 +243,7 @@ export default function UploadPage() {
               className="relative grid aspect-square cursor-pointer place-items-center overflow-hidden"
             >
               {url ? (
-                <img src={url} alt="Pratinjau" className="h-full w-full object-cover grayscale contrast-[1.1]" />
+                <img src={url} alt="Pratinjau" className="h-full w-full object-cover" />
               ) : (
                 <div className="flex flex-col items-center gap-3 px-6 text-center">
                   <UploadCloud className="h-12 w-12 text-bone/30" strokeWidth={1.2} />
@@ -174,7 +252,7 @@ export default function UploadPage() {
                   </p>
                 </div>
               )}
-              {stage === 'analyzing' && (
+              {(stage === 'analyzing' || stage === 'saving') && (
                 <div className="absolute inset-0 grid place-items-center bg-coal/75 backdrop-blur-sm">
                   <div className="flex flex-col items-center gap-3">
                     <motion.span
@@ -182,7 +260,9 @@ export default function UploadPage() {
                       animate={{ rotate: 360 }}
                       transition={{ repeat: Infinity, duration: 0.9, ease: 'linear' }}
                     />
-                    <p className="text-[10px] uppercase tracking-[0.16em]">{t.upload.analyzing}</p>
+                    <p className="text-[10px] uppercase tracking-[0.16em]">
+                      {stage === 'saving' ? 'MENYIMPAN KE SQLITE…' : t.upload.analyzing}
+                    </p>
                   </div>
                 </div>
               )}
@@ -203,11 +283,16 @@ export default function UploadPage() {
             <p className="eyebrow text-bone/50">{t.upload.samples}</p>
             <div className="mt-3 grid grid-cols-3 gap-2">
               {SAMPLES.map((sample) => (
-                <button key={sample.label} type="button" onClick={() => loadSample(sample)} className="group text-left">
+                <button
+                  key={sample.label}
+                  type="button"
+                  onClick={() => void loadSample(sample)}
+                  className="group text-left"
+                >
                   <GarmentImage
                     src={sample.img}
                     alt={sample.label}
-                    slot={articleSlot(sample.article)}
+                    slot={sample.slot}
                     className="aspect-square w-full border border-bone/10 transition-colors group-hover:border-bone/40"
                   />
                   <span className="mt-1 block text-[8px] uppercase tracking-[0.12em] text-muted group-hover:text-[#C9A24B]">
@@ -245,16 +330,29 @@ export default function UploadPage() {
               </div>
             ) : (
               <>
-                <Eyebrow className="text-bone/50">{t.upload.eyebrow}</Eyebrow>
+                <div className="flex items-center justify-between gap-2">
+                  <Eyebrow className="text-bone/50">{t.upload.eyebrow}</Eyebrow>
+                  {inferenceMs !== null && (
+                    <span className="text-[9px] uppercase tracking-[0.14em] text-muted">
+                      EFFICIENTNETB0 · {inferenceMs} MS
+                    </span>
+                  )}
+                </div>
                 <h2 className="mt-2 font-slab text-2xl uppercase sm:text-3xl">{t.upload.review}</h2>
 
                 {stage === 'idle' ? (
                   <p className="mt-4 max-w-md text-xs leading-relaxed text-bone/60">
-                    Pilih foto atau pakai salah satu contoh cepat di kiri. Model akan mengisi tiga label beserta
-                    tingkat keyakinannya.
+                    Pilih foto atau pakai salah satu contoh cepat di kiri. Model EfficientNetB0 di backend akan
+                    memprediksi tipe pakaian, warna dasar, acara, dan embedding 256-d.
                   </p>
                 ) : (
                   <div className="mt-5 space-y-5">
+                    {!supported && (
+                      <p className="border border-terracotta/40 bg-terracotta/10 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-terracotta">
+                        Prediksi awal masuk kategori &quot;other&quot; — silakan pilih kategori terdekat di bawah.
+                      </p>
+                    )}
+
                     <div>
                       <div className="flex items-center justify-between gap-2">
                         <span className="eyebrow text-bone/50">{t.upload.article}</span>
@@ -265,17 +363,18 @@ export default function UploadPage() {
                         onChange={(event) => setArticle(event.target.value)}
                         className="mt-2 w-full border border-bone/20 bg-coal px-3 py-2 text-xs uppercase tracking-[0.14em] text-bone"
                       >
-                        {ARTICLES.map((option) => (
-                          <option key={option.value} value={option.value} className="bg-coal">
-                            {option.label}
+                        {articleOptions.map((option) => (
+                          <option key={option.key} value={option.key} className="bg-coal">
+                            {option.display}
                           </option>
                         ))}
                       </select>
-                      {chips(
-                        ALT_ARTICLES.map((value) => ({ value, label: articleLabel(value) })),
-                        article,
-                        setArticle,
-                      )}
+                      {altArticles.length > 0 &&
+                        chips(
+                          altArticles.map((value) => ({ value, label: articleLabel(value) })),
+                          article,
+                          setArticle,
+                        )}
                       <div className="mt-2">
                         <ScoreBar value={conf.article * 100} />
                       </div>
@@ -291,17 +390,18 @@ export default function UploadPage() {
                         onChange={(event) => setColour(event.target.value)}
                         className="mt-2 w-full border border-bone/20 bg-coal px-3 py-2 text-xs uppercase tracking-[0.14em] text-bone"
                       >
-                        {COLOURS.map((option) => (
-                          <option key={option} value={option} className="bg-coal">
-                            {option}
+                        {colourOptions.map((option) => (
+                          <option key={option.key} value={option.key} className="bg-coal">
+                            {option.display}
                           </option>
                         ))}
                       </select>
-                      {chips(
-                        ALT_COLOURS.map((value) => ({ value, label: value })),
-                        colour,
-                        setColour,
-                      )}
+                      {altColours.length > 0 &&
+                        chips(
+                          altColours.map((value) => ({ value, label: colourLabel(value) })),
+                          colour,
+                          setColour,
+                        )}
                       <div className="mt-2">
                         <ScoreBar value={conf.colour * 100} />
                       </div>
@@ -323,11 +423,12 @@ export default function UploadPage() {
                           </option>
                         ))}
                       </select>
-                      {chips(
-                        ALT_USAGES.map((value) => ({ value, label: USAGE_LABEL[value] })),
-                        usage,
-                        (value) => setUsage(value as Usage),
-                      )}
+                      {altUsages.length > 0 &&
+                        chips(
+                          altUsages.map((value) => ({ value, label: USAGE_LABEL[value] })),
+                          usage,
+                          (value) => setUsage(value as Usage),
+                        )}
                       <div className="mt-2">
                         <ScoreBar value={conf.usage * 100} />
                       </div>
@@ -339,7 +440,7 @@ export default function UploadPage() {
                     </div>
 
                     <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.16em] text-muted">
-                      <ColourDot colour={colour} /> {colour}
+                      <ColourDot colour={colour} /> {colourLabel(colour)}
                     </div>
 
                     <div className="flex gap-2 border-t border-bone/15 pt-4">
@@ -352,8 +453,9 @@ export default function UploadPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={save}
-                        className="flex-1 rounded-full bg-bone px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.16em] text-coal"
+                        disabled={stage === 'analyzing' || stage === 'saving'}
+                        onClick={() => void save()}
+                        className="flex-1 rounded-full bg-bone px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.16em] text-coal disabled:opacity-50"
                       >
                         {t.upload.save}
                       </button>
@@ -363,7 +465,7 @@ export default function UploadPage() {
 
                 {stage === 'analyzing' && (
                   <p className="mt-4 text-[10px] uppercase tracking-[0.16em] text-muted">
-                    Menjalankan MobileNetV2…
+                    Menjalankan EfficientNetB0…
                   </p>
                 )}
               </>
@@ -377,7 +479,7 @@ export default function UploadPage() {
         type="file"
         accept="image/*"
         className="hidden"
-        onChange={(event) => handleFile(event.target.files?.[0])}
+        onChange={(event) => void handleFile(event.target.files?.[0])}
       />
     </div>
   )
